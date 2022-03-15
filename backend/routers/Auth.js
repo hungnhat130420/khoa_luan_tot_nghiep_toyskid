@@ -1,0 +1,10 @@
+const express = require("express");
+const router = express.Router();
+const AuthController = require("../controllers/Auth");
+router.post("/signupbyemail", AuthController.signUpByPhone);
+router.post("/signupbyphone", AuthController.signUpByPhone);
+router.post("/signinbyemail", AuthController.signIn);
+router.post("/sendotpphone", AuthController.sendOTPPhone);
+router.post("/verifyotpphone", AuthController.verifyOTPPhone);
+router.post("/sendverifyemail", AuthController.sendVerifyEmail);
+module.exports = router;
