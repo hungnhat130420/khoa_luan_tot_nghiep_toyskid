@@ -31,7 +31,6 @@ const signUpByEmail = async (req, res, next) => {
     return res.json({
       success: true,
       message: "Create User By Email Success!!!",
-      accessToken,
     });
   } catch (error) {
     next(error);
@@ -60,7 +59,6 @@ const signUpByPhone = async (req, res, next) => {
     return res.json({
       success: true,
       message: "Create User By Email Success!!!",
-      accessToken,
     });
   } catch (error) {
     next(error);
