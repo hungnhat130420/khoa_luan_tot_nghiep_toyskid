@@ -18,13 +18,10 @@ const UserSchema = new Schema(
     phone: {
       type: String,
       unique: true,
-      min: 10,
-      max: 11,
     },
     password: {
       type: String,
       required: true,
-      min: 6,
     },
     address: {
       type: String,

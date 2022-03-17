@@ -7,7 +7,7 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceId = process.env.TWILIO_SERVICE_SID;
 const twilioClient = require("twilio")(accountSid, authToken);
 const nodemailer = require("nodemailer");
-
+let rfToken = [];
 const signUpByEmail = async (req, res, next) => {
   try {
     const { fullName, userName, email, password } = req.body;
@@ -28,10 +28,6 @@ const signUpByEmail = async (req, res, next) => {
       password: hashedPassword,
     });
     await newUser.save();
-    const accessToken = jwt.sign(
-      { userID: newUser._id },
-      process.env.ACCESS_TOKEN_SECRET
-    );
     return res.json({
       success: true,
       message: "Create User By Email Success!!!",
@@ -61,10 +57,6 @@ const signUpByPhone = async (req, res, next) => {
       password: hashedPassword,
     });
     await newUser.save();
-    const accessToken = jwt.sign(
-      { userID: newUser._id },
-      process.env.ACCESS_TOKEN_SECRET
-    );
     return res.json({
       success: true,
       message: "Create User By Email Success!!!",
@@ -75,50 +67,72 @@ const signUpByPhone = async (req, res, next) => {
   }
 };
 
-const signIn = async (req, res, next) => {
+const signInByPhone = async (req, res, next) => {
   try {
-    const { email, phone, password } = req.body;
-    if (!email && phone && password) {
-      const foundPhone = await User.findOne({ phone });
-      if (!foundPhone)
-        return res
-          .status(400)
-          .json({ error: { message: "Số điện thoại không chính xác!!!" } });
-      const validPassword = argon2.verify(foundPhone.password, password);
-      if (!validPassword)
-        return res
-          .status(400)
-          .json({ error: { message: "Password không chính xác!!!" } });
-      const accessToken = jwt.sign(
-        { userID: foundPhone._id },
-        process.env.ACCESS_TOKEN_SECRET
-      );
-      return res.json({
-        success: true,
-        message: "Đăng nhập bằng số điện thoại thành công!!!",
-        accessToken,
-      });
-    } else if (email && !phone && password) {
-      const foundEmail = await User.findOne({ email });
-      if (!foundEmail)
-        return res
-          .status(400)
-          .json({ error: { message: "Email không chính xác!!!" } });
-      const validPassword = argon2.verify(foundEmail.password, password);
-      if (!validPassword)
-        return res
-          .status(400)
-          .json({ error: { message: "Password không chính xác!!!" } });
-      const accessToken = jwt.sign(
-        { userID: foundEmail._id },
-        process.env.ACCESS_TOKEN_SECRET
-      );
-      return res.json({
-        success: true,
-        message: "Đăng nhập bằng Email thành công!!!",
-        accessToken,
-      });
-    }
+    const { phone, password } = req.body;
+    if (!phone || !password)
+      return res
+        .status(400)
+        .json({ error: { message: "Chưa nhập đầy đủ thông tin!!!" } });
+    const foundPhone = await User.findOne({ phone });
+    if (!foundPhone)
+      return res
+        .status(400)
+        .json({ error: { message: "Số điện thoại không chính xác!!!" } });
+    const validPassword = await argon2.verify(foundPhone.password, password);
+    if (!validPassword)
+      return res
+        .status(400)
+        .json({ error: { message: "Password không chính xác!!!" } });
+    const accessToken = jwt.sign(
+      { userID: foundPhone._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "3600s" }
+    );
+    const refreshToken = jwt.sign(
+      { userID: foundPhone._id },
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    rfToken.push(refreshToken);
+    return res.json({
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const signInByEmail = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ error: { message: "Chưa nhập đầy đủ thông tin!!!" } });
+    const foundEmail = await User.findOne({ email });
+    if (!foundEmail)
+      return res
+        .status(400)
+        .json({ error: { message: "Email không chính xác!!!" } });
+    const validPassword = await argon2.verify(foundEmail.password, password);
+    if (!validPassword)
+      return res
+        .status(400)
+        .json({ error: { message: "Password không chính xác!!!" } });
+    const accessToken = jwt.sign(
+      { userID: foundEmail._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "3600s" }
+    );
+    const refreshToken = jwt.sign(
+      { userID: foundEmail._id },
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    rfToken.push(refreshToken);
+    return res.json({
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     next(error);
   }
@@ -203,14 +217,98 @@ const sendVerifyEmail = async (req, res, next) => {
     next(error);
   }
 };
+const refreshToken = async (req, res, next) => {
+  try {
+    const { refreshTK } = req.body;
+    if (!refreshTK) return res.sendStatus(401);
+    if (!rfToken.includes(refreshTK)) return res.sendStatus(403);
+    jwt.verify(refreshTK, process.env.REFRESH_TOKEN_SECRET, (err, data) => {
+      if (err) return res.sendStatus(403);
+      const accessToken = jwt.sign(
+        { userID: data._id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "3600s" }
+      );
+      return res.status(200).json(accessToken);
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const logout = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    rfToken = rfToken.filter((refTK) => refTK !== refreshToken);
+    return res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+};
 
+const checkPhone = async (req, res, next) => {
+  try {
+    const { phone } = req.body;
+    const foundPhone = await User.findOne({ phone });
+    if (foundPhone) {
+      return res.sendStatus(200);
+    } else {
+      return res.sendStatus(403);
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+const checkEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const foundEmail = await User.findOne({ email });
+    if (foundEmail) {
+      return res.sendStatus(200);
+    } else {
+      return res.sendStatus(403);
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
+const changePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    const validPassword = await argon2.verify(foundUser.password, oldPassword);
+    if (!validPassword)
+      return res
+        .status(400)
+        .json({ error: { message: "Password không chính xác!!!" } });
+    const hashedNewPassword = await argon2.hash(newPassword);
+    foundUser.password = hashedNewPassword;
+    await foundUser.save();
+    return res.status(200).json({
+      Status: "success",
+      message: "Đổi mật khẩu thành công!!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   signUpByEmail,
   signUpByPhone,
-  signIn,
+  signInByPhone,
+  signInByEmail,
   sendOTPPhone,
   verifyOTPPhone,
   sendVerifyEmail,
+  refreshToken,
+  logout,
+  checkPhone,
+  checkEmail,
+  changePassword,
 };
