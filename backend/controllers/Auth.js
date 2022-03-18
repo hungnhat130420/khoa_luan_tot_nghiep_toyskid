@@ -273,7 +273,6 @@ const checkEmail = async (req, res, next) => {
 const changePassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
-
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res

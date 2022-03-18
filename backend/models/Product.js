@@ -13,16 +13,14 @@ const ProductSchema = new Schema(
       type: Number,
     },
     price: {
-      type: mongoose.Schema.Types.Double,
+      type: Number,
     },
     description: {
       type: String,
     },
-    color: [
-      {
-        type: String,
-      },
-    ],
+    color: {
+      type: Array,
+    },
     categoryID: {
       type: Schema.Types.ObjectId,
       ref: "Category",
