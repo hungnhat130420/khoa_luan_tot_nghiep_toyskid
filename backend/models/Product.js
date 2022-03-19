@@ -18,9 +18,9 @@ const ProductSchema = new Schema(
     description: {
       type: String,
     },
-    color: {
-      type: Array,
-    },
+    color: [{
+      type: String,
+    }],
     categoryID: {
       type: Schema.Types.ObjectId,
       ref: "Category",

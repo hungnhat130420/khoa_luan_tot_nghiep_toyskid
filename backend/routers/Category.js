@@ -5,6 +5,7 @@ const verifyToken = require("../middleware/auth");
 router.post("/addcategory",verifyToken.verifyToken,CategoryController.AddCategory);
 router.put("/updatecategory/:categoryID",verifyToken.verifyToken,CategoryController.UpdateCategory);
 router.delete("/deletecategory/:categoryID",verifyToken.verifyToken,CategoryController.DeleteCategory);
-router.get("/findcategory",verifyToken.verifyToken,CategoryController.FindCategory);
+router.get("/findcategorybyname",verifyToken.verifyToken,CategoryController.FindCategoryByName);
+router.get("/findcategorybyid",verifyToken.verifyToken,CategoryController.FindCategoryByID);
 router.get("/getallcategory",verifyToken.verifyToken,CategoryController.GetAllCategory);
 module.exports = router;

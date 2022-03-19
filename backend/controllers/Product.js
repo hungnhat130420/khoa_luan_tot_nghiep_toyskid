@@ -1,5 +1,5 @@
 const Product = require("../models/Product");
-const mongoose = require("mongoose");
+const User = require("../models/User");
 const AddProduct = async (req, res, next) => {
   try {
     const productName = req.body.productName;
@@ -10,17 +10,12 @@ const AddProduct = async (req, res, next) => {
     const color = req.body.color;
     const categoryID = req.body.categoryID;
     const brandID = req.body.brandID;
-    let listColors = [];
-    for (let i = 0; i < color.length; i++) {
-        listColors.push(mongoose.Types.ObjectId(color[i]));
-    }
     if (
       !productName ||
       !image ||
       !quantity ||
       !price ||
       !description ||
-      !color ||
       !categoryID ||
       !brandID
     )
@@ -33,18 +28,153 @@ const AddProduct = async (req, res, next) => {
       quantity,
       price,
       description,
-      listColors,
+      color,
       categoryID,
       brandID,
     });
-    await newProduct.save();
+    const result = await newProduct.save();
     return res.json({
       success: true,
       message: "Add new Product Success!!!",
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const UpdateProduct = async (req, res, next) => {
+  try {
+    const productID = req.params.productID;
+    const newProduct = req.body;
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    await Product.findByIdAndUpdate(productID, newProduct);
+    return res.json({
+      success: true,
+      message: "Update Product Success!!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const DeleteProduct = async (req, res, next) => {
+  try {
+    const productID = req.params.productID;
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    await Product.deleteOne({ _id: productID });
+    return res.json({
+      success: true,
+      message: "Delete Product Success!!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const FindProductByName = async (req, res, next) => {
+  try {
+    const { productName } = req.body;
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    const result = await Product.find({ productName });
+    return res.json({
+      success: true,
+      message: "Find Product Success!!!",
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const FindProductByID = async (req, res, next) => {
+  try {
+    const { _id } = req.body;
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    const result = await Product.findOne({ _id });
+    return res.json({
+      success: true,
+      message: "Find Product Success!!!",
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const FindProductByCategoryID = async (req, res, next) => {
+  try {
+    const { categoryID } = req.body;
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    const result = await Product.find({ categoryID });
+    return res.json({
+      success: true,
+      message: "Find Product Success!!!",
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const FindProductByBrandID = async (req, res, next) => {
+  try {
+    const { brandID } = req.body;
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    const result = await Product.find({ brandID });
+    return res.json({
+      success: true,
+      message: "Find Product Success!!!",
+      result,
     });
   } catch (error) {
     next(error);
   }
 };
 
-module.exports = { AddProduct };
+const GetAllProduct = async (req, res, next) => {
+  try {
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    const result = await Product.find({});
+    return res.json({
+      success: true,
+      message: "Get All Product Success!!!",
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  AddProduct,
+  UpdateProduct,
+  DeleteProduct,
+  FindProductByName,
+  FindProductByID,
+  FindProductByCategoryID,
+  FindProductByBrandID,
+  GetAllProduct,
+};

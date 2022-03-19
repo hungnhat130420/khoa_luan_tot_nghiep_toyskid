@@ -1,25 +1,26 @@
-const Category = require("../models/Category");
+const Brand = require("../models/Brand");
 const User = require("../models/User");
-const AddCategory = async (req, res, next) => {
+
+const AddBrand = async (req, res, next) => {
   try {
-    const { categoryName, quantity } = req.body;
+    const { brandName, nation } = req.body;
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    if (!categoryName || !quantity)
+    if (!brandName || !nation)
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
-    const newCategory = new Category({
-      categoryName,
-      quantity,
+    const newBrand = new Brand({
+      brandName,
+      nation,
     });
-    const result = await newCategory.save();
+    const result = await newBrand.save();
     return res.json({
       success: true,
-      message: "Add New Category Success!!!",
+      message: "Add New Brand Success!!!",
       result,
     });
   } catch (error) {
@@ -27,62 +28,80 @@ const AddCategory = async (req, res, next) => {
   }
 };
 
-const UpdateCategory = async (req, res, next) => {
+const UpdateBrand = async (req, res, next) => {
   try {
-    const categoryID = req.params.categoryID;
-    const newCategory = req.body;
+    const brandID = req.params.brandID;
+    const newBrand = req.body;
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    await Category.findByIdAndUpdate(categoryID, newCategory);
+    await Brand.findByIdAndUpdate(brandID, newBrand);
     return res.json({
       success: true,
-      message: "Update Category Success!!!",
+      message: "Update Brand Success!!!",
     });
   } catch (error) {
     next(error);
   }
 };
 
-const DeleteCategory = async (req, res, next) => {
+const DeleteBrand = async (req, res, next) => {
   try {
-    const categoryID = req.params.categoryID;
+    const brandID = req.params.brandID;
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    await Category.deleteOne({ _id: categoryID });
+    await Brand.deleteOne({ _id: brandID });
     return res.json({
       success: true,
-      message: "Delete Category Success!!!",
+      message: "Delete Brand Success!!!",
     });
   } catch (error) {
     next(error);
   }
 };
 
-const FindCategoryByName = async (req, res, next) => {
+const FindBrandByName = async (req, res, next) => {
   try {
-    const { categoryName } = req.body;
+    const { brandName } = req.body;
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    const result = await Category.find({ categoryName });
+    const result = await Brand.find({ brandName });
     return res.json({
       success: true,
-      message: "Find Category Success!!!",
+      message: "Find Brand Success!!!",
       result,
     });
   } catch (error) {
     next(error);
   }
 };
-const FindCategoryByID = async (req, res, next) => {
+const FindBrandByNation = async (req, res, next) => {
+  try {
+    const { nation } = req.body;
+    const foundUser = await User.findOne({ _id: req.userID });
+    if (!foundUser)
+      return res
+        .status(403)
+        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    const result = await Brand.find({ nation });
+    return res.json({
+      success: true,
+      message: "Find Brand Success!!!",
+      result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const FindBrandByID = async (req, res, next) => {
   try {
     const { _id } = req.body;
     const foundUser = await User.findOne({ _id: req.userID });
@@ -90,28 +109,27 @@ const FindCategoryByID = async (req, res, next) => {
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    const result = await Category.findOne({ _id });
+    const result = await Brand.findOne({ _id });
     return res.json({
       success: true,
-      message: "Find Category Success!!!",
+      message: "Find Brand Success!!!",
       result,
     });
   } catch (error) {
     next(error);
   }
 };
-
-const GetAllCategory = async (req, res, next) => {
+const GetAllBrand = async (req, res, next) => {
   try {
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    const result = await Category.find({});
+    const result = await Brand.find({});
     return res.json({
       success: true,
-      message: "Get All Category Success!!!",
+      message: "Get All Brand Success!!!",
       result,
     });
   } catch (error) {
@@ -120,10 +138,11 @@ const GetAllCategory = async (req, res, next) => {
 };
 
 module.exports = {
-  AddCategory,
-  UpdateCategory,
-  DeleteCategory,
-  FindCategoryByName,
-  FindCategoryByID,
-  GetAllCategory,
+  AddBrand,
+  UpdateBrand,
+  DeleteBrand,
+  FindBrandByName,
+  FindBrandByNation,
+  FindBrandByID,
+  GetAllBrand,
 };
