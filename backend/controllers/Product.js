@@ -1,5 +1,6 @@
 const Product = require("../models/Product");
 const User = require("../models/User");
+const Evaluate = require("../models/Evaluate");
 const AddProduct = async (req, res, next) => {
   try {
     const productName = req.body.productName;
@@ -33,6 +34,8 @@ const AddProduct = async (req, res, next) => {
       brandID,
     });
     const result = await newProduct.save();
+    const newEvaluate = new Evaluate({productID: result._id});
+    await newEvaluate.save();
     return res.json({
       success: true,
       message: "Add new Product Success!!!",
@@ -69,6 +72,7 @@ const DeleteProduct = async (req, res, next) => {
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
     await Product.deleteOne({ _id: productID });
+    await Evaluate.deleteOne({ productID: productID });
     return res.json({
       success: true,
       message: "Delete Product Success!!!",

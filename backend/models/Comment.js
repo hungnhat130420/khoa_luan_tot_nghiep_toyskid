@@ -8,10 +8,13 @@ const CommentSchema = new Schema(
     },
     timeCreate: {
       type: Date,
+      default: Date.now(),
     },
-    vote: {
-      type: Number,
-    },
+    vote: [
+      {
+        type: String,
+      },
+    ],
     userID: {
       type: Schema.Types.ObjectId,
       ref: "User",

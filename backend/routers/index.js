@@ -5,11 +5,17 @@ const user = require("./User");
 const category = require("./Category");
 const brand = require("./Brand");
 const product = require("./Product");
-
+const cart = require("./Cart");
+const contact = require("./Contact");
+const evaluate = require("./Evaluate");
+const comment = require("./Comment");
 router.use("/auth", auth);
 router.use("/user", user);
 router.use("/category", category);
 router.use("/brand", brand);
 router.use("/product", product);
-
+router.use("/cart", cart);
+router.use("/contact", contact);
+router.use("/evaluate", evaluate);
+router.use("/comment", comment);
 module.exports = router;

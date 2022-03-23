@@ -3,23 +3,33 @@ const Schema = mongoose.Schema;
 
 const EvaluateSchema = new Schema(
   {
-    oneStar: {
-      type: Number,
-    },
-    twoStar: {
-      type: Number,
-    },
-    threeStar: {
-      type: Number,
-    },
-    fourStar: {
-      type: Number,
-    },
-    fiveStar: {
-      type: Number,
-    },
+    oneStar: [
+      {
+        type: String,
+      },
+    ],
+    twoStar: [
+      {
+        type: String,
+      },
+    ],
+    threeStar: [
+      {
+        type: String,
+      },
+    ],
+    fourStar: [
+      {
+        type: String,
+      },
+    ],
+    fiveStar: [
+      {
+        type: String,
+      },
+    ],
     avgEvaluate: {
-      type: mongoose.Schema.Types.Float,
+      type: Number,
     },
     totalCount: {
       type: Number,

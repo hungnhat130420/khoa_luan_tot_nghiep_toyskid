@@ -58,7 +58,7 @@ const signUpByPhone = async (req, res, next) => {
     await newUser.save();
     return res.json({
       success: true,
-      message: "Create User By Email Success!!!",
+      message: "Create User By Phone Success!!!",
     });
   } catch (error) {
     next(error);

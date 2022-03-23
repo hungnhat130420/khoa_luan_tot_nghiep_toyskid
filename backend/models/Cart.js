@@ -7,11 +7,16 @@ const CartSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Product",
     },
+    userID: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     quantity: {
       type: Number,
     },
     dateAdd: {
       type: Date,
+      default: Date.now(),
     },
   },
   { timestamps: true }
