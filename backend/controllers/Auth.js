@@ -270,22 +270,45 @@ const checkEmail = async (req, res, next) => {
   }
 };
 
-const changePassword = async (req, res, next) => {
+const ForgetPassword = async (req, res, next) => {
   try {
-    const { oldPassword, newPassword } = req.body;
-    const foundUser = await User.findOne({ _id: req.userID });
-    if (!foundUser)
-      return res
-        .status(403)
-        .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    const validPassword = await argon2.verify(foundUser.password, oldPassword);
-    if (!validPassword)
-      return res
-        .status(400)
-        .json({ error: { message: "Password không chính xác!!!" } });
-    const hashedNewPassword = await argon2.hash(newPassword);
-    foundUser.password = hashedNewPassword;
-    await foundUser.save();
+    const { phone, email, oldPassword, newPassword } = req.body;
+    if (phone || !email || !oldPassword || !newPassword) {
+      const foundUser = await User.findOne({ phone: phone });
+      if (!foundUser)
+        return res
+          .status(403)
+          .json({ error: { message: "Không tìm thấy Email!!!" } });
+      const validPassword = await argon2.verify(
+        foundUser.password,
+        oldPassword
+      );
+      if (!validPassword)
+        return res
+          .status(400)
+          .json({ error: { message: "Password không chính xác!!!" } });
+      const hashedNewPassword = await argon2.hash(newPassword);
+      foundUser.password = hashedNewPassword;
+      await foundUser.save();
+    }
+    if (!phone || email || !oldPassword || !newPassword) {
+      const foundUser = await User.findOne({ email: email });
+      if (!foundUser)
+        return res
+          .status(403)
+          .json({ error: { message: "Không tìm thấy số điện thoại!!!" } });
+      const validPassword = await argon2.verify(
+        foundUser.password,
+        oldPassword
+      );
+      if (!validPassword)
+        return res
+          .status(400)
+          .json({ error: { message: "Password không chính xác!!!" } });
+      const hashedNewPassword = await argon2.hash(newPassword);
+      foundUser.password = hashedNewPassword;
+      await foundUser.save();
+    }
     return res.status(200).json({
       Status: "success",
       message: "Đổi mật khẩu thành công!!!",
@@ -307,5 +330,5 @@ module.exports = {
   logout,
   checkPhone,
   checkEmail,
-  changePassword,
+  ForgetPassword,
 };

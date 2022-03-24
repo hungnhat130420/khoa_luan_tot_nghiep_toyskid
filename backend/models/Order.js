@@ -14,18 +14,19 @@ const OrderSchema = new Schema(
     },
     dateCreated: {
       type: Date,
+      default: Date.now(),
     },
     dateShipped: {
       type: Date,
     },
     totalMoney: {
-      type: mongoose.Schema.Types.Float,
+      type: Number,
+      default: 0,
     },
-    orderStatus: [
-      {
-        type: String,
-      },
-    ],
+    orderStatus: {
+      type: String,
+      default: "pending",
+    },
     userID: {
       type: Schema.Types.ObjectId,
       ref: "User",
