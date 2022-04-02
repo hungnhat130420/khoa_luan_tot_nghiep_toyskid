@@ -30,9 +30,11 @@ const EvaluateSchema = new Schema(
     ],
     avgEvaluate: {
       type: Number,
+      default:0.00
     },
     totalCount: {
       type: Number,
+      default:0
     },
     productID: {
       type: Schema.Types.ObjectId,

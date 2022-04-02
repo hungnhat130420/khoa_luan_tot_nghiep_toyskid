@@ -3,19 +3,19 @@ const User = require("../models/User");
 const Product = require("../models/Product");
 const AddCart = async (req, res, next) => {
   try {
-    const { productID, userID, quantity } = req.body;
+    const { productID, quantity } = req.body;
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    if (!productID || !userID || !quantity)
+    if (!productID || !quantity)
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
     const newCart = new Cart({
       productID,
-      userID,
+      userID: foundUser._id,
       quantity,
     });
     const result = await newCart.save();

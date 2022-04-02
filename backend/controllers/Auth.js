@@ -92,9 +92,11 @@ const signInByPhone = async (req, res, next) => {
       process.env.REFRESH_TOKEN_SECRET
     );
     rfToken.push(refreshToken);
+    const user = await User.findOne({ phone });
     return res.json({
       accessToken,
       refreshToken,
+      user,
     });
   } catch (error) {
     next(error);
@@ -127,9 +129,12 @@ const signInByEmail = async (req, res, next) => {
       process.env.REFRESH_TOKEN_SECRET
     );
     rfToken.push(refreshToken);
+    const user = await User.findOne({ email });
+    console.log("success");
     return res.json({
       accessToken,
       refreshToken,
+      user,
     });
   } catch (error) {
     next(error);

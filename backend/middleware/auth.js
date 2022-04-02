@@ -17,5 +17,4 @@ const verifyToken = (req, res, next) => {
       .json({ success: false, message: "Invalid Token!!!" });
   }
 };
-
 module.exports = { verifyToken };

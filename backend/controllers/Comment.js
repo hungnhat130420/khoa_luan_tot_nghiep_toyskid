@@ -3,19 +3,19 @@ const User = require("../models/User");
 
 const AddComment = async (req, res, next) => {
   try {
-    const { content, userID, productID } = req.body;
+    const { content, productID } = req.body;
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    if (!content || !userID || !productID)
+    if (!content || !productID)
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
     const newComment = new Comment({
       content,
-      userID,
+      userID: foundUser._id,
       productID,
     });
     const result = await newComment.save();

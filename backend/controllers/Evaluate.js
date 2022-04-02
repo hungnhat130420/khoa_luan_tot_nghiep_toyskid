@@ -14,11 +14,11 @@ const ChangeStart = async (req, res, next) => {
       return res
         .status(403)
         .json({ error: { message: "Không tìm thấy sản phẩm!!!" } });
-    const one = foundEvaluate.oneStar;
-    const two = foundEvaluate.twoStar;
-    const three = foundEvaluate.threeStar;
-    const four = foundEvaluate.fourStar;
-    const five = foundEvaluate.fiveStar;
+    let one = foundEvaluate.oneStar;
+    let two = foundEvaluate.twoStar;
+    let three = foundEvaluate.threeStar;
+    let four = foundEvaluate.fourStar;
+    let five = foundEvaluate.fiveStar;
     if (oneStar && !twoStar && !threeStar && !fourStar && !fiveStar) {
       if (one.includes(foundUser._id)) {
         one.remove(foundUser._id);

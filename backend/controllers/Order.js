@@ -8,6 +8,16 @@ const AddOrder = async (req, res, next) => {
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
+    if (
+      foundUser.address == "" ||
+      foundUser.phone == "" ||
+      foundUser.email == ""
+    )
+      return res
+        .status(403)
+        .json({
+          error: { message: "Người dùng chưa cập nhật đầy đủ thông tin!!!" },
+        });
     const newOrder = new Order({
       userName: foundUser.userName,
       userPhone: foundUser.phone,
@@ -53,10 +63,13 @@ const UpdateOrderTotalMoney = async (req, res, next) => {
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
     const result = await OrderDetail.find({ orderID: orderID });
+    console.log(result);
     let totalmn = 0;
     for (let i = 0; i < result.length; i++) {
       totalmn = totalmn + result[i].totalMoney;
+      console.log(result[i].totalMoney);
     }
+
     await Order.findByIdAndUpdate(orderID, { totalMoney: totalmn });
     return res.json({
       success: true,

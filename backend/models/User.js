@@ -11,15 +11,18 @@ const UserSchema = new Schema(
     },
     email: {
       type: String,
+      default:""
     },
     phone: {
       type: String,
+      default:""
     },
     password: {
       type: String,
     },
     address: {
       type: String,
+      default:""
     },
     gender: {
       type: Boolean,

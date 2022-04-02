@@ -21,7 +21,7 @@ const OrderSchema = new Schema(
     },
     totalMoney: {
       type: Number,
-      default: 0,
+      default: 0.00,
     },
     orderStatus: {
       type: String,

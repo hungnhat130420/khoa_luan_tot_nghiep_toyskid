@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const useRouter = require("./routers/index");
+const cors = require("cors");
 const app = express();
 const connectDB = async () => {
   try {
@@ -18,5 +19,6 @@ const connectDB = async () => {
 
 connectDB();
 app.use(express.json());
-app.use("/api/", useRouter);
+app.use(cors());
+app.use("/", useRouter);
 app.listen(5000, () => console.log("Server started!!!"));

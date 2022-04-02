@@ -4,13 +4,13 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 const sendMailFeedback = async (req, res, next) => {
   try {
-    const { userID, content } = req.body;
+    const { content } = req.body;
     const foundUser = await User.findOne({ _id: req.userID });
     if (!foundUser)
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    if (!userID || !content)
+    if (!content)
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
@@ -35,7 +35,7 @@ const sendMailFeedback = async (req, res, next) => {
       html: `${content}`,
     });
     const newContact = new Contact({
-      userID,
+      userID: foundUser._id,
       content,
     });
     newContact.save();
