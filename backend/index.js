@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const mongoose = require("mongoose");
-const useRouter = require("./routers/index");
+const useRouter = require("./router/index");
 const cors = require("cors");
 const app = express();
 const connectDB = async () => {

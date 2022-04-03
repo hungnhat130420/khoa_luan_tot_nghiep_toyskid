@@ -275,7 +275,7 @@ const checkEmail = async (req, res, next) => {
   }
 };
 
-const ForgetPassword = async (req, res, next) => {
+const forgetPassword = async (req, res, next) => {
   try {
     const { phone, email, oldPassword, newPassword } = req.body;
     if (phone || !email || !oldPassword || !newPassword) {
@@ -335,5 +335,5 @@ module.exports = {
   logout,
   checkPhone,
   checkEmail,
-  ForgetPassword,
+  forgetPassword,
 };
