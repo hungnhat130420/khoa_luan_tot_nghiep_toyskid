@@ -1,25 +1,23 @@
-import React, {useRef, useState, useEffect} from 'react'
-
+import React, { useRef, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import ThemeAction from '../../redux/actions/ThemeAction'
 import './thememenu.css'
 
-import { useDispatch } from 'react-redux'
 
-import ThemeAction from '../../redux/actions/ThemeAction'
-
-const mode_settings = [
-    {
-        id: 'light',
-        name: 'Light',
-        background: 'light-background',
-        class: 'theme-mode-light'
-    },
-    {
-        id: 'dark',
-        name: 'Dark',
-        background: 'dark-background',
-        class: 'theme-mode-dark'
-    }
-]
+// const mode_settings = [
+//     {
+//         id: 'light',
+//         name: 'Light',
+//         background: 'light-background',
+//         class: 'theme-mode-light'
+//     },
+//     {
+//         id: 'dark',
+//         name: 'Dark',
+//         background: 'dark-background',
+//         class: 'theme-mode-dark'
+//     }
+// ]
 
 const color_settings = [
     {
@@ -97,16 +95,16 @@ const ThemeMenu = () => {
         dispatch(ThemeAction.setColor(color.class))
     }
 
-    useEffect(() => {
-        const themeClass = mode_settings.find(e => e.class === localStorage.getItem('themeMode', 'theme-mode-light'))
+    // useEffect(() => {
+    //     const themeClass = mode_settings.find(e => e.class === localStorage.getItem('themeMode', 'theme-mode-light'))
 
-        const colorClass = color_settings.find(e => e.class === localStorage.getItem('colorMode', 'theme-mode-light'))
+    //     const colorClass = color_settings.find(e => e.class === localStorage.getItem('colorMode', 'theme-mode-light'))
 
-        if (themeClass !== undefined) setcurrMode(themeClass.id)
+    //     if (themeClass !== undefined) setcurrMode(themeClass.id)
 
-        if (colorClass !== undefined) setcurrColor(colorClass.id)
+    //     if (colorClass !== undefined) setcurrColor(colorClass.id)
 
-    }, []);
+    // }, []);
 
     return (
         <div>
@@ -118,7 +116,7 @@ const ThemeMenu = () => {
                 <button className="theme-menu__close" onClick={() => closeMenu()}>
                     <i className='bx bx-x'></i>
                 </button>
-                <div className="theme-menu__select">
+                {/* <div className="theme-menu__select">
                     <span>Choose mode</span>
                     <ul className="mode-list">
                         {
@@ -132,7 +130,7 @@ const ThemeMenu = () => {
                             ))
                         }
                     </ul>
-                </div>
+                </div> */}
                 <div className="theme-menu__select">
                     <span>Choose color</span>
                     <ul className="mode-list">

@@ -3,44 +3,28 @@ import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState } from "react";
-import productList from "../assets/JsonData/product-list.json";
+import categoryList from "../assets/JsonData/categories-list.json";
 import Table from "../components/table/Table";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import { Modal, Row, Col, Form } from "react-bootstrap";
 
-const Products = () => {
+export const Categories = () => {
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleShowEdit = () => setShowEdit(true);
   const handleCloseEdit = () => setShowEdit(false);
-  const productTableHead = [
-    "",
-    "image",
-    "Category",
-    "Name",
-    "Quantity in stock",
-    "Price",
-    "In stock",
-    "Action",
-  ];
+  const categoryTableHead = ["", "Category Name", "Quantity", "Action"];
 
   const renderHead = (item, index) => <th key={index}>{item}</th>;
 
   const renderBody = (item, index) => (
     <tr key={index}>
       <td>{item.id}</td>
-      <td>
-        {" "}
-        <img src={item.name} alt="company logo" style={{ width: "40%" }} />{" "}
-      </td>
-      <td>{item.email}</td>
-      <td>{item.phone}</td>
-      <td>{item.total_orders}</td>
-      <td>{item.total_spend}</td>
-      <td>{item.location}</td>
+      <td> {item.categoryName} </td>
+      <td>{item.quantity}</td>
       <td className="d-flex flex-row">
         <IconButton aria-label="delete" size="large">
           <EditIcon
@@ -55,10 +39,9 @@ const Products = () => {
       </td>
     </tr>
   );
-
   return (
     <>
-      <h2 className="page-header">products</h2>
+      <h2 className="page-header">categories</h2>
       <div style={{ padding: "20px" }}>
         <Button
           variant="outlined"
@@ -66,7 +49,7 @@ const Products = () => {
           startIcon={<AddIcon />}
           onClick={handleShow}
         >
-          Add Product
+          Add Category
         </Button>
       </div>
       <div className="row">
@@ -75,9 +58,9 @@ const Products = () => {
             <div className="card__body">
               <Table
                 limit="10"
-                headData={productTableHead}
+                headData={categoryTableHead}
                 renderHead={(item, index) => renderHead(item, index)}
-                bodyData={productList}
+                bodyData={categoryList}
                 renderBody={(item, index) => renderBody(item, index)}
               />
             </div>
@@ -85,29 +68,13 @@ const Products = () => {
         </div>
       </div>
 
-      {/* modal add product */}
+      {/* modal add category */}
       <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Add Product</Modal.Title>
+          <Modal.Title>Add Category</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Row className="mb-3">
-              <Col>
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  placeholder="pick image"
-                />
-              </Col>
-              <Col>
-                <Form.Control
-                  placeholder="Category"
-                  type="text"
-                  name="category"
-                />
-              </Col>
-            </Row>
             <Row className="mb-3">
               <Col>
                 <Form.Control placeholder="Name" type="text" name="name" />
@@ -121,29 +88,6 @@ const Products = () => {
               </Col>
             </Row>
 
-            <Row className="mb-3 ml-3">
-              <Col>
-                <Form.Control placeholder="Price" type="number" name="price" />
-              </Col>
-
-              <Col>
-                <Form.Check
-                  inline
-                  label="Instock"
-                  name="group1"
-                  type="radio"
-                  //id={`inline-${type}-1`}
-                />
-                <Form.Check
-                  inline
-                  name="group1"
-                  label="No Instock"
-                  type="radio"
-                  //id={`inline-${type}-2`}
-                />
-              </Col>
-            </Row>
-
             <Form.Group className="mb-3">
               <Button
                 style={{
@@ -153,7 +97,7 @@ const Products = () => {
                 variant="contained"
                 type="submit"
               >
-                Add Product
+                Add Category
               </Button>
             </Form.Group>
           </Form>
@@ -161,29 +105,13 @@ const Products = () => {
       </Modal>
       {/* End modal add product */}
 
-      {/*  modal update product */}
+      {/* modal update category */}
       <Modal show={showEdit} onHide={handleCloseEdit} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Update Product</Modal.Title>
+          <Modal.Title>Update Category</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Row className="mb-3">
-              <Col>
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  placeholder="pick image"
-                />
-              </Col>
-              <Col>
-                <Form.Control
-                  placeholder="Category"
-                  type="text"
-                  name="category"
-                />
-              </Col>
-            </Row>
             <Row className="mb-3">
               <Col>
                 <Form.Control placeholder="Name" type="text" name="name" />
@@ -197,29 +125,6 @@ const Products = () => {
               </Col>
             </Row>
 
-            <Row className="mb-3 ml-3">
-              <Col>
-                <Form.Control placeholder="Price" type="number" name="price" />
-              </Col>
-
-              <Col>
-                <Form.Check
-                  inline
-                  label="Instock"
-                  name="group1"
-                  type="radio"
-                  //id={`inline-${type}-1`}
-                />
-                <Form.Check
-                  inline
-                  name="group1"
-                  label="No Instock"
-                  type="radio"
-                  //id={`inline-${type}-2`}
-                />
-              </Col>
-            </Row>
-
             <Form.Group className="mb-3">
               <Button
                 style={{
@@ -229,14 +134,13 @@ const Products = () => {
                 variant="contained"
                 type="submit"
               >
-                Update Product
+                Update Category
               </Button>
             </Form.Group>
           </Form>
         </Modal.Body>
       </Modal>
+      {/* End modal update product */}
     </>
   );
 };
-
-export default Products;

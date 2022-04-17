@@ -20,23 +20,13 @@
         "icon": "bx bx-cart"
     },
     {
-        "display_name": "Analytics",
-        "route": "/analytics",
-        "icon": "bx bx-bar-chart-alt"
-    },
-    {
         "display_name": "categories",
         "route": "/categories",
         "icon": "bx bx-list-ol"
     },
     {
-        "display_name": "discount",
-        "route": "/discount",
-        "icon": "bx bx-gift"
-    },
-    {
-        "display_name": "inventory",
-        "route": "/inventory",
+        "display_name": "brands",
+        "route": "/brands",
         "icon": "bx bx-store-alt"
     },
     {
