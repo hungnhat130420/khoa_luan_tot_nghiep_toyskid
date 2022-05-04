@@ -1,51 +1,42 @@
 import LockIcon from "@mui/icons-material/Lock";
 import IconButton from "@mui/material/IconButton";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState } from "react";
-import customerList from "../assets/JsonData/customers-list.json";
-import Table from "../components/table/Table";
+import React, { useState, useEffect } from "react";
+
+// import Table from "../components/table/Table";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-import { Modal, Row, Col, Form } from "react-bootstrap";
-
-const customerTableHead = [
-  "",
-  "Name",
-  "Email",
-  "Phone",
-  "Address",
-  "Gender",
-  "Active",
-  "Action",
-];
-
-const renderHead = (item, index) => <th key={index}>{item}</th>;
-
-const renderBody = (item, index) => (
-  <tr key={index}>
-    <td>{item.id}</td>
-    <td>{item.name}</td>
-    <td>{item.email}</td>
-    <td>{item.phone}</td>
-    <td>{item.total_orders}</td>
-    <td>{item.total_spend}</td>
-    <td>{item.location}</td>
-    <td className="d-flex flex-row">
-      {" "}
-      <IconButton aria-label="delete" size="large">
-        <LockIcon fontSize="inherit" style={{ color: "gold" }} />
-      </IconButton>
-    </td>
-  </tr>
-);
+import { Modal, Row, Col, Form, Table } from "react-bootstrap";
+import userAPI from "../api/userAPI";
 
 const Customers = () => {
+  const accessToken = localStorage.getItem("accessToken_admin");
+
+  localStorage.getItem("user_admin");
+  const [listUser, setListUser] = useState([]);
+  useEffect(() => {
+    const fetchGetAll = async () => {
+      try {
+        const getAllUser = await userAPI.getAllUser(accessToken);
+
+        console.log(getAllUser.result);
+        setListUser(getAllUser.result);
+
+        //setAllProduct(getAllProduct.result);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchGetAll();
+  }, []);
+
+  // console.log(localStorage.getItem("accessToken_admin"));
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   return (
     <>
-      <h2 className="page-header">customers</h2>
+      <h2 className="page-header">Quản lý khách hàng</h2>
       <div style={{ padding: "20px" }}>
         <Button
           variant="outlined"
@@ -53,20 +44,47 @@ const Customers = () => {
           startIcon={<AddIcon />}
           onClick={handleShow}
         >
-          Add Customer
+          Thêm khách hàng
         </Button>
       </div>
       <div className="row">
         <div className="col-12">
           <div className="card">
             <div className="card__body">
-              <Table
-                limit="10"
-                headData={customerTableHead}
-                renderHead={(item, index) => renderHead(item, index)}
-                bodyData={customerList}
-                renderBody={(item, index) => renderBody(item, index)}
-              />
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>Mã khách hàng</th>
+                    <th>Tên đầy đủ</th>
+                    <th>Số điện thoại</th>
+                    <th>Email</th>
+                    <th>Địa chỉ</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {listUser.map((item, i) => (
+                    <tr key={i}>
+                      <td>{item._id}</td>
+                      <td>{item.fullName}</td>
+                      <td>{item.phone}</td>
+                      <td>{item.email}</td>
+                      <td>{item.address}</td>
+                      <td>{item.userName}</td>
+                      <td>
+                        {" "}
+                        <IconButton aria-label="delete" size="large">
+                          <LockIcon
+                            fontSize="inherit"
+                            style={{ color: "gold" }}
+                          />
+                        </IconButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </div>
           </div>
         </div>

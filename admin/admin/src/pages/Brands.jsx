@@ -2,12 +2,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import categoryList from "../assets/JsonData/categories-list.json";
-import Table from "../components/table/Table";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-import { Modal, Row, Col, Form } from "react-bootstrap";
+import { Modal, Row, Col, Form, Table } from "react-bootstrap";
+import brandAPI from "../api/brandAPI";
 
 export const Brands = () => {
   const [show, setShow] = useState(false);
@@ -16,33 +16,71 @@ export const Brands = () => {
   const handleShow = () => setShow(true);
   const handleShowEdit = () => setShowEdit(true);
   const handleCloseEdit = () => setShowEdit(false);
-  const brandTableHead = ["", "Brand Name", "Nation", "Action"];
+  const [listBrand, setListBrand] = useState([]);
+  const [showDelete, setShowDelete] = useState(false);
+  const [valueBrand, setValueBrand] = useState("");
+  const handleDeleteClose = () => setShowDelete(false);
 
-  const renderHead = (item, index) => <th key={index}>{item}</th>;
+  useEffect(() => {
+    const fetchGetAllBrand = async () => {
+      try {
+        const getAllBrand = await brandAPI.getallbrand();
 
-  const renderBody = (item, index) => (
-    <tr key={index}>
-      <td>{item.id}</td>
-      <td> {item.categoryName} </td>
-      <td>{item.quantity}</td>
-      <td className="d-flex flex-row">
-        <IconButton aria-label="delete" size="large">
-          <EditIcon
-            fontSize="small"
-            style={{ color: "blue" }}
-            onClick={handleShowEdit}
-          />
-        </IconButton>
-        <IconButton aria-label="delete" size="large">
-          <DeleteIcon fontSize="small" style={{ color: "red" }} />
-        </IconButton>
-      </td>
-    </tr>
-  );
+        console.log(getAllBrand.result);
+        setListBrand(getAllBrand.result);
+
+        //setAllProduct(getAllProduct.result);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchGetAllBrand();
+  }, []);
 
   return (
     <>
-      <h2 className="page-header">brands</h2>
+      <Modal show={showDelete} onHide={handleDeleteClose}>
+        <Modal.Header>Bạn có chắc chắn muốn xoá ?</Modal.Header>
+        <Modal.Footer>
+          <Button
+            style={{
+              fontSize: "13px",
+              backgroundColor: "red",
+              marginRight: "10px",
+            }}
+            variant="contained"
+            type="submit"
+            onClick={async () => {
+              try {
+                await brandAPI.deletebrand(
+                  { _id: valueBrand._id },
+                  localStorage.getItem("accessToken_admin")
+                );
+                setShowDelete(false);
+
+                window.location.reload(false);
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+          >
+            Xóa
+          </Button>
+
+          <Button
+            style={{
+              fontSize: "13px",
+              backgroundColor: "gray",
+            }}
+            variant="contained"
+            onClick={handleDeleteClose}
+          >
+            Hủy
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <h2 className="page-header">Quản lý thương hiệu</h2>
       <div style={{ padding: "20px" }}>
         <Button
           variant="outlined"
@@ -50,20 +88,53 @@ export const Brands = () => {
           startIcon={<AddIcon />}
           onClick={handleShow}
         >
-          Add Brand
+          Thêm thương hiệu
         </Button>
       </div>
       <div className="row">
         <div className="col-12">
           <div className="card">
             <div className="card__body">
-              <Table
-                limit="10"
-                headData={brandTableHead}
-                renderHead={(item, index) => renderHead(item, index)}
-                bodyData={categoryList}
-                renderBody={(item, index) => renderBody(item, index)}
-              />
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>Mã thương hiệu</th>
+                    <th>Tên thương hiệu</th>
+                    <th>Quốc gia</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {listBrand.map((item, i) => (
+                    <tr key={i}>
+                      <td>{item._id}</td>
+                      <td>{item.brandName}</td>
+                      <td>{item.nation}</td>
+
+                      <td>
+                        {" "}
+                        <IconButton aria-label="delete" size="large">
+                          <EditIcon
+                            onClick={handleShowEdit}
+                            fontSize="small"
+                            style={{ color: "blue" }}
+                          />
+                        </IconButton>
+                        <IconButton aria-label="delete" size="large">
+                          <DeleteIcon
+                            fontSize="small"
+                            style={{ color: "red" }}
+                            onClick={() => {
+                              setValueBrand(item);
+                              setShowDelete(true);
+                            }}
+                          />
+                        </IconButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </div>
           </div>
         </div>
@@ -72,7 +143,7 @@ export const Brands = () => {
       {/* modal add brand */}
       <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title> Add Brand </Modal.Title>
+          <Modal.Title> Thêm thương hiệu </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -94,7 +165,7 @@ export const Brands = () => {
                 variant="contained"
                 type="submit"
               >
-                Add Brand
+                Thêm thươnng hiệu
               </Button>
             </Form.Group>
           </Form>
@@ -104,7 +175,7 @@ export const Brands = () => {
       {/* modal update brand */}
       <Modal show={showEdit} onHide={handleCloseEdit} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title> Update Brand </Modal.Title>
+          <Modal.Title> Cập nhật thương hiệu </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -126,7 +197,7 @@ export const Brands = () => {
                 variant="contained"
                 type="submit"
               >
-                Update Brand
+                Cập nhật thương hiệu
               </Button>
             </Form.Group>
           </Form>

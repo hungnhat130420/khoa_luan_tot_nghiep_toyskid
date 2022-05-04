@@ -2,63 +2,90 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState } from "react";
-import productList from "../assets/JsonData/product-list.json";
-import Table from "../components/table/Table";
+import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-import { Modal, Row, Col, Form } from "react-bootstrap";
+import { Modal, Row, Col, Form, Table } from "react-bootstrap";
+import productAPI from "../api/productAPI";
 
 const Products = () => {
+  const accessToken = localStorage.getItem("accessToken_admin");
+  localStorage.getItem("user_admin");
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [valueProduct, setValueProduct] = useState("");
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const handleShowEdit = () => setShowEdit(true);
   const handleCloseEdit = () => setShowEdit(false);
-  const productTableHead = [
-    "",
-    "image",
-    "Category",
-    "Name",
-    "Quantity in stock",
-    "Price",
-    "In stock",
-    "Action",
-  ];
 
-  const renderHead = (item, index) => <th key={index}>{item}</th>;
+  const [showDelete, setShowDelete] = useState(false);
 
-  const renderBody = (item, index) => (
-    <tr key={index}>
-      <td>{item.id}</td>
-      <td>
-        {" "}
-        <img src={item.name} alt="company logo" style={{ width: "40%" }} />{" "}
-      </td>
-      <td>{item.email}</td>
-      <td>{item.phone}</td>
-      <td>{item.total_orders}</td>
-      <td>{item.total_spend}</td>
-      <td>{item.location}</td>
-      <td className="d-flex flex-row">
-        <IconButton aria-label="delete" size="large">
-          <EditIcon
-            onClick={handleShowEdit}
-            fontSize="small"
-            style={{ color: "blue" }}
-          />
-        </IconButton>
-        <IconButton aria-label="delete" size="large">
-          <DeleteIcon fontSize="small" style={{ color: "red" }} />
-        </IconButton>
-      </td>
-    </tr>
-  );
+  const handleDeleteClose = () => setShowDelete(false);
 
+  const [listProduct, setListProduct] = useState([]);
+  const handleDelete = () => {
+    console.log("click");
+    handleDeleteClose();
+  };
+  useEffect(() => {
+    const fetchGetAllProduct = async () => {
+      try {
+        const getAllProduct = await productAPI.getallproduct();
+
+        //console.log(getAllProduct.result);
+        setListProduct(getAllProduct.result);
+
+        //setAllProduct(getAllProduct.result);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchGetAllProduct();
+  }, []);
   return (
     <>
-      <h2 className="page-header">products</h2>
+      <Modal show={showDelete} onHide={handleDeleteClose}>
+        <Modal.Header>Bạn có chắc chắn muốn xoá ?</Modal.Header>
+        <Modal.Footer>
+          <Button
+            style={{
+              fontSize: "13px",
+              backgroundColor: "red",
+              marginRight: "10px",
+            }}
+            variant="contained"
+            type="submit"
+            onClick={async () => {
+              try {
+                await productAPI.deleteproduct(
+                  { _id: valueProduct._id },
+                  localStorage.getItem("accessToken_admin")
+                );
+                setShowDelete(false);
+
+                window.location.reload(false);
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+          >
+            Xóa
+          </Button>
+
+          <Button
+            style={{
+              fontSize: "13px",
+              backgroundColor: "gray",
+            }}
+            variant="contained"
+            onClick={handleDeleteClose}
+          >
+            Hủy
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <h2 className="page-header">Quản lý sản phẩm</h2>
       <div style={{ padding: "20px" }}>
         <Button
           variant="outlined"
@@ -66,20 +93,71 @@ const Products = () => {
           startIcon={<AddIcon />}
           onClick={handleShow}
         >
-          Add Product
+          Thêm sản phẩm
         </Button>
       </div>
       <div className="row">
         <div className="col-12">
           <div className="card">
             <div className="card__body">
-              <Table
-                limit="10"
-                headData={productTableHead}
-                renderHead={(item, index) => renderHead(item, index)}
-                bodyData={productList}
-                renderBody={(item, index) => renderBody(item, index)}
-              />
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>Mã sản phẩm</th>
+                    <th>Hình ảnh</th>
+
+                    <th>Tên sản phẩm</th>
+                    <th>Số lượng tồn</th>
+                    <th>Giá</th>
+                    <th>Tình trạng</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {listProduct.map((item, i) => {
+                    return (
+                      <tr key={i}>
+                        <td>{item._id}</td>
+                        <td>
+                          <img
+                            src={item.image}
+                            alt=""
+                            style={{ width: "100px", height: "100px" }}
+                          />
+                        </td>
+                        <td>{item.productName}</td>
+                        <td>{item.quantity}</td>
+                        <td>{item.price}</td>
+                        <td>{item.quantity > 0 ? "Còn hàng" : "Hết hàng"} </td>
+                        <td>
+                          {" "}
+                          <IconButton aria-label="delete" size="large">
+                            <EditIcon
+                              onClick={() => {
+                                setValueProduct(item);
+                                console.log(item._id);
+                                setShowDelete(true);
+                              }}
+                              fontSize="small"
+                              style={{ color: "blue" }}
+                            />
+                          </IconButton>
+                          <IconButton aria-label="delete" size="large">
+                            <DeleteIcon
+                              fontSize="small"
+                              style={{ color: "red" }}
+                              onClick={() => {
+                                setValueProduct(item);
+                                setShowDelete(true);
+                              }}
+                            />
+                          </IconButton>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
             </div>
           </div>
         </div>
@@ -88,7 +166,7 @@ const Products = () => {
       {/* modal add product */}
       <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Add Product</Modal.Title>
+          <Modal.Title>Thêm sản phẩm</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -153,7 +231,7 @@ const Products = () => {
                 variant="contained"
                 type="submit"
               >
-                Add Product
+                Thêm sản phẩm
               </Button>
             </Form.Group>
           </Form>
@@ -164,7 +242,7 @@ const Products = () => {
       {/*  modal update product */}
       <Modal show={showEdit} onHide={handleCloseEdit} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Update Product</Modal.Title>
+          <Modal.Title>Cập nhật sản phẩm</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -229,7 +307,7 @@ const Products = () => {
                 variant="contained"
                 type="submit"
               >
-                Update Product
+                Cập nhật
               </Button>
             </Form.Group>
           </Form>
