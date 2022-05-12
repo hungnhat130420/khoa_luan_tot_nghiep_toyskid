@@ -17,6 +17,8 @@ import user_menu from "../../assets/JsonData/user_menus.json";
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 
+import Product from "../../pages/Products";
+
 const curr_user = {
   display_name: "Nhat Hung",
   image: user_image,
@@ -47,11 +49,20 @@ const renderUserMenu = (item, index) => (
   </Link>
 );
 
+const handleSearch = (e) => {
+  console.log(e.target.value);
+};
+
 const Topnav = () => {
   return (
     <div className="topnav">
       <div className="topnav__search">
-        <input type="text" placeholder="Search here..." />
+        <input
+          type="text"
+          placeholder="Nhập thông tin cần tìm..."
+          onChange={handleSearch}
+        />
+
         <i>
           <IconButton aria-label="delete" size="large">
             <SearchIcon fontSize="inherit" />

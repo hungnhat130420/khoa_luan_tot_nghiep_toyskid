@@ -18,6 +18,26 @@ const categoryAPI = {
 
     return axiosClient.delete(url, { header: { Authorization: accessToken } });
   },
+  updatecategory(data, accessToken) {
+    const url = "/category/updatecategory/" + data._id;
+
+    return axiosClient.put(
+      url,
+      { categoryName: data.categoryName },
+      { header: { Authorization: accessToken } }
+    );
+  },
+  addcategory(data, accessToken) {
+    const url = "/category/addcategory";
+    console.log(data);
+    return axiosClient.post(
+      url,
+      {
+        categoryName: data.categoryName,
+      },
+      { header: { Authorization: accessToken } }
+    );
+  },
 };
 
 export default categoryAPI;
