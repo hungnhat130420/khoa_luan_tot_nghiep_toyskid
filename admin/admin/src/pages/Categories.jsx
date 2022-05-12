@@ -67,7 +67,7 @@ export const Categories = () => {
       setShowEdit(false);
       setNotify({
         isOpen: true,
-        message: "Cập nhật thành công thành công",
+        message: "Cập nhật thành công",
         type: "success",
       });
       window.location.reload(false);

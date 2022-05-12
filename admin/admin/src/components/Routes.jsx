@@ -8,6 +8,7 @@ import Products from "../pages/Products";
 import { Orders } from "../pages/Orders";
 import { Brands } from "../pages/Brands";
 import { Categories } from "../pages/Categories";
+import { Contacts } from "../pages/Contacts";
 import { Profile } from "../components/profile/Profile";
 
 const Routes = () => {
@@ -20,6 +21,7 @@ const Routes = () => {
       <Route path="/brands" component={Brands} />
       <Route path="/categories" component={Categories} />
       <Route path="/profile" component={Profile} />
+      <Route path="/contacts" component={Contacts} />
     </Switch>
   );
 };

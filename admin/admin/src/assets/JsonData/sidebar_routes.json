@@ -28,6 +28,11 @@
         "display_name": "Quản lý thương hiệu",
         "route": "/brands",
         "icon": "bx bx-store-alt"
+    },
+    {
+        "display_name": "Quản lý liên hệ",
+        "route": "/contacts",
+        "icon": "bx bx-phone"
     }
    
 ]
