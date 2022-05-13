@@ -29,7 +29,7 @@ const brandAPI = {
 
     return axiosClient.put(
       url,
-      { brandName: data.brandName, nation: data.nation },
+      { brandName: data.brandName, nation: data.nation, image: data.image },
       { header: { Authorization: accessToken } }
     );
   },

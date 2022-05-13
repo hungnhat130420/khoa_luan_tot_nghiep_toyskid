@@ -17,7 +17,7 @@ const Customers = () => {
   useEffect(() => {
     const fetchGetAll = async () => {
       try {
-        const getAllUser = await userAPI.getAllUser(accessToken);
+        const getAllUser = await userAPI.getAllUser();
 
         console.log(getAllUser.result);
         setListUser(getAllUser.result);

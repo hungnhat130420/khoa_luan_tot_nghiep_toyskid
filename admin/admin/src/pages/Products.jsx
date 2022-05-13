@@ -17,6 +17,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import SearchIcon from "@mui/icons-material/Search";
 import "../components/topnav/topnav1.css";
+import uploadAPI from "../api/uploadAPI";
 const Products = () => {
   const accessToken = localStorage.getItem("accessToken_admin");
   localStorage.getItem("user_admin");
@@ -105,14 +106,18 @@ const Products = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+    const fd = new FormData();
+    fd.append("image", productImage);
+    const result = await uploadAPI.uploadimage(fd);
+    const arr = [];
+    arr.push(result);
     await productAPI.addproduct(
       {
         productName: productName,
         price: productPrice,
         quantity: productQuantity,
         description: productDescription,
-        image:
-          "https://fado.vn/blog/wp-content/uploads/2021/01/Megaminx_Rubik_12_m___t.jpg",
+        image: result,
         brandID: productBrand,
         color: [],
         categoryID: productCategory,

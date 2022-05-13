@@ -19,7 +19,7 @@ import "../components/css/product.css";
 import ReactPaginate from "react-paginate";
 import SearchIcon from "@mui/icons-material/Search";
 import "../components/topnav/topnav1.css";
-
+import uploadAPI from "../api/uploadAPI";
 export const Brands = () => {
   const history = useHistory();
   const [show, setShow] = useState(false);
@@ -43,6 +43,8 @@ export const Brands = () => {
   const [brandName, setBrandName] = useState("");
 
   const [nation, setNation] = useState("");
+
+  const [brandImage, setBrandImage] = useState("");
   const options = useMemo(() => countryList().getData(), []);
 
   const changeHandler = (value) => {
@@ -51,12 +53,16 @@ export const Brands = () => {
 
   const handleAddBrand = async (e) => {
     e.preventDefault();
+    const fd = new FormData();
+    fd.append("image", brandImage);
+    const result = await uploadAPI.uploadimage(fd);
+    const arr = [];
+    arr.push(result);
     await brandAPI.addbrand(
       {
         brandName: brandName,
         nation: nation.label,
-        image:
-          "https://fado.vn/blog/wp-content/uploads/2021/01/Megaminx_Rubik_12_m___t.jpg",
+        image: result,
       },
       localStorage.getItem("accessToken_admin")
     );
@@ -72,9 +78,17 @@ export const Brands = () => {
 
   const handleUpdateBrand = async (e) => {
     e.preventDefault();
+    const fd = new FormData();
+    fd.append("image", brandImage);
+    const result = await uploadAPI.uploadimage(fd);
     try {
       await brandAPI.updatebrand(
-        { _id: valueBrand._id, brandName: brandName, nation: nation.label },
+        {
+          _id: valueBrand._id,
+          brandName: brandName,
+          nation: nation.label,
+          image: result,
+        },
         localStorage.getItem("accessToken_admin")
       );
       setShowEdit(false);
@@ -242,6 +256,7 @@ export const Brands = () => {
                               onClick={() => {
                                 setValueBrand(item);
                                 setShowEdit(true);
+                                console.log("item", item);
                               }}
                               fontSize="small"
                               style={{ color: "blue" }}
@@ -312,6 +327,7 @@ export const Brands = () => {
                     type="file"
                     accept="image/*"
                     placeholder="pick image"
+                    onChange={(e) => setBrandImage(e.target.files[0])}
                   />
                 </Col>
               </Col>
@@ -363,29 +379,37 @@ export const Brands = () => {
             </Row>
             <Row className="mb-3 ml-3">
               <Col>
-                <Col>
-                  <Form.Control
-                    type="file"
-                    accept="image/*"
-                    placeholder="pick image"
-                  />
-                </Col>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  placeholder="pick image"
+                  onChange={(e) => setBrandImage(e.target.files[0])}
+                />
+
+                <Button
+                  style={{
+                    fontSize: "15px",
+                    backgroundColor: "blue",
+                    marginTop: "30px",
+                  }}
+                  variant="contained"
+                  type="submit"
+                  onClick={handleUpdateBrand}
+                >
+                  Cập nhật thương hiệu
+                </Button>
+              </Col>
+
+              <Col>
+                <img
+                  src={valueBrand.image}
+                  alt=""
+                  style={{ width: "370px", height: "200px" }}
+                />
               </Col>
             </Row>
 
-            <Form.Group className="mb-3">
-              <Button
-                style={{
-                  fontSize: "15px",
-                  backgroundColor: "blue",
-                }}
-                variant="contained"
-                type="submit"
-                onClick={handleUpdateBrand}
-              >
-                Cập nhật thương hiệu
-              </Button>
-            </Form.Group>
+            <Form.Group className="mb-3"></Form.Group>
           </Form>
         </Modal.Body>
       </Modal>

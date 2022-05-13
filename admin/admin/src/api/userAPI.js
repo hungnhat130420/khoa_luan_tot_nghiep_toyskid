@@ -5,9 +5,9 @@ const userAPI = {
     const url = "/user/finduserbyid";
     return axiosClient.post(url, { header: { Authorization: accessToken } });
   },
-  getAllUser(accessToken) {
+  getAllUser() {
     const url = "/user/getalluser";
-    return axiosClient.get(url, { header: { Authorization: accessToken } });
+    return axiosClient.get(url);
   },
 };
 

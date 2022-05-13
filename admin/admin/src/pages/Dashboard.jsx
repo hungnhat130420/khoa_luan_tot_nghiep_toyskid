@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -7,7 +7,11 @@ import Badge from "../components/badge/Badge";
 import StatusCard from "../components/status-card/StatusCard";
 import Table from "../components/table/Table";
 import authAPI from "../api/authAPI";
-
+import "../components/status-card/status-card.css";
+import productAPI from "../api/productAPI";
+import brandAPI from "../api/brandAPI";
+import orderAPI from "../api/orderAPI";
+import userAPI from "../api/userAPI";
 const chartOptions = {
   series: [
     {
@@ -183,21 +187,119 @@ const Dashboard = () => {
   }, []);
   const themeReducer = useSelector((state) => state.ThemeReducer.mode);
 
+  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [brands, setBrands] = useState([]);
+
+  useEffect(() => {
+    const fetchGetAllProduct = async () => {
+      try {
+        const getAllProduct = await productAPI.getallproduct();
+        setProducts(getAllProduct.result);
+
+        const getAllUser = await userAPI.getAllUser();
+        setUsers(getAllUser.result);
+
+        const getAllBrand = await brandAPI.getallbrand();
+        setBrands(getAllBrand.result);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchGetAllProduct();
+  }, []);
+
+  useEffect(() => {
+    const fetchGetAllOrder = async () => {
+      try {
+        const getAllOrder = await orderAPI.getallorder();
+        setOrders(getAllOrder.result);
+
+        //console.log("products", displayPerPage);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchGetAllOrder();
+  }, []);
+
+  useEffect(() => {
+    const fetchGetAllUser = async () => {
+      try {
+        const getAllUser = await userAPI.getAllUser();
+        setBrands(getAllUser.result);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchGetAllUser();
+  }, []);
+
+  useEffect(() => {
+    const fetchGetAllBrand = async () => {
+      try {
+        const getAllBrand = await brandAPI.getallbrand();
+        setBrands(getAllBrand.result);
+
+        //console.log("products", displayPerPage);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchGetAllBrand();
+  }, []);
+
   return (
     <div>
       <h2 className="page-header">Dashboard</h2>
       <div className="row">
         <div className="col-6">
           <div className="row">
-            {statusCards.map((item, index) => (
-              <div className="col-6" key={index}>
-                <StatusCard
-                  icon={item.icon}
-                  count={item.count}
-                  title={item.title}
-                />
+            <div className="col-6">
+              <div className="status-card">
+                <div className="status-card__icon">
+                  <i className="bx bx-cart"></i>
+                </div>
+                <div className="status-card__info">
+                  <h4>{users.length}</h4>
+                  <span>Tổng số khách hàng </span>
+                </div>
               </div>
-            ))}
+            </div>
+            <div className="col-6">
+              <div className="status-card">
+                <div className="status-card__icon">
+                  <i className="bx bx-cart"></i>
+                </div>
+                <div className="status-card__info">
+                  <h4>{products.length}</h4>
+                  <span>Tổng số sản phẩm</span>
+                </div>
+              </div>
+            </div>
+            <div className="col-6">
+              <div className="status-card">
+                <div className="status-card__icon">
+                  <i className="bx bx-cart"></i>
+                </div>
+                <div className="status-card__info">
+                  <h4>{orders.length}</h4>
+                  <span>Tổng số đơn hàng</span>
+                </div>
+              </div>
+            </div>
+            <div className="col-6">
+              <div className="status-card">
+                <div className="status-card__icon">
+                  <i className="bx bx-cart"></i>
+                </div>
+                <div className="status-card__info">
+                  <h4>{brands.length}</h4>
+                  <span>Tổng số thương hiệu</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="col-6">
