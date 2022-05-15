@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
@@ -15,7 +15,9 @@ import { useHistory } from "react-router-dom";
 import userAPI from "../../api/userAPI";
 import authAPI from "../../api/authAPI";
 import DatePicker from "react-datepicker";
+import uploadAPI from "../../api/uploadAPI";
 import "react-datepicker/dist/react-datepicker.css";
+import Notifycation from "../../components/alert/Notifycation";
 const Profile = () => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -23,6 +25,15 @@ const Profile = () => {
   const history = useHistory();
   const user = JSON.parse(localStorage.getItem("user_admin"));
 
+  const [notify, setNotify] = useState({
+    isOpen: false,
+    message: "",
+    type: "",
+  });
+
+  const imageAvatar = useRef(null);
+  const [image, setImage] = useState(user.avatar);
+  const [avatar, setAvatar] = useState();
   const [fullName, setFullName] = useState(user.fullName);
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
@@ -37,20 +48,36 @@ const Profile = () => {
     setGender(!gender);
   };
 
+  const handleImage = async (e) => {
+    const imageA = e.target.files[0];
+    const fd = new FormData();
+    fd.append("image", imageA);
+    const result = await uploadAPI.uploadimage(fd);
+    setImage(result);
+  };
+
   const handleUpdateUser = async (e) => {
     e.preventDefault();
+
     try {
       const updateUser = await userAPI.updateuser(
         {
           fullName: fullName,
           birthday: startDate,
           gender: gender,
+          avatar: image,
           email: email,
           phone: phone,
         },
         localStorage.getItem("user_admin")
       );
+
       window.location.reload(false);
+      setNotify({
+        isOpen: true,
+        message: "Cập nhật thành công",
+        type: "success",
+      });
       if (updateUser.success === true) {
         localStorage.setItem("user_admin", JSON.stringify(updateUser.result));
       }
@@ -75,8 +102,10 @@ const Profile = () => {
                   accept="image/*"
                   id="contained-button-file"
                   name="file"
+                  ref={imageAvatar}
                   style={{ display: "none" }}
                   type="file"
+                  onChange={handleImage}
                 />
                 <label htmlFor="contained-button-file">
                   <IconButton
@@ -97,9 +126,10 @@ const Profile = () => {
                       }
                     >
                       <Avatar
+                        src={image}
                         style={{
-                          width: "150px",
-                          height: "150px",
+                          width: "200px",
+                          height: "200px",
                         }}
                         variant="circle"
                       ></Avatar>
@@ -121,12 +151,6 @@ const Profile = () => {
                     variant="outlined"
                     onChange={(e) => setFullName(e.target.value)}
                   />
-                  {/* <Form.Label>Tên đầy đủ:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  /> */}
                 </Grid>
                 <Grid item xs={7}>
                   <Form.Label>Ngày sinh:</Form.Label>
@@ -275,6 +299,7 @@ const Profile = () => {
           </form>
         </Modal.Body>
       </Modal>
+      <Notifycation notify={notify} setNotify={setNotify} />
     </>
   );
 };

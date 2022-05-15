@@ -136,6 +136,9 @@ const Products = () => {
   };
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
+    const fd = new FormData();
+    fd.append("image", productUpdateImage);
+    const result = await uploadAPI.uploadimage(fd);
 
     try {
       await productAPI.updateproduct(
@@ -145,8 +148,7 @@ const Products = () => {
           price: productUpdatePrice,
           quantity: productUpdateQuantity,
           description: productUpdateDescription,
-          image:
-            "https://fado.vn/blog/wp-content/uploads/2021/01/Megaminx_Rubik_12_m___t.jpg",
+          image: result,
           brandID: productUpdateBrandID,
           //brandID: valueBrand._id,
 
@@ -309,6 +311,7 @@ const Products = () => {
                                     setProductUpdateDescription(
                                       item.description
                                     );
+                                    setProductUpdateImage(item.image);
                                     setProductUpdateCategory(item.categoryID);
                                     setProductUpdateBrandID(item.brandID);
                                     const brandName =
@@ -320,7 +323,7 @@ const Products = () => {
                                           "accessToken_admin"
                                         )
                                       );
-                                    console.log("BRAND", productUpdateBrandID);
+                                    console.log("BRAND", productUpdateImage);
                                     setValueBrand(brandName.result);
                                     setProductUpdateBrand(
                                       brandName.result.brandName
@@ -556,6 +559,8 @@ const Products = () => {
                   type="file"
                   accept="image/*"
                   placeholder="pick image"
+                  //value={productUpdateImage}
+                  onChange={(e) => setProductUpdateImage(e.target.files[0])}
                 />
               </Col>
               <Col>

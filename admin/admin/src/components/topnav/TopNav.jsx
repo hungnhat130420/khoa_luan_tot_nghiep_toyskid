@@ -19,11 +19,6 @@ import SearchIcon from "@mui/icons-material/Search";
 
 import Product from "../../pages/Products";
 
-const curr_user = {
-  display_name: "Nhat Hung",
-  image: user_image,
-};
-
 const renderNotificationItem = (item, index) => (
   <div className="notification-item" key={index}>
     <i className={item.icon}></i>
@@ -54,6 +49,12 @@ const handleSearch = (e) => {
 };
 
 const Topnav = () => {
+  const user = JSON.parse(localStorage.getItem("user_admin"));
+  const curr_user = {
+    display_name: user.userName,
+    image: user.avatar,
+  };
+
   return (
     <div className="topnav">
       <div className="topnav__search">
