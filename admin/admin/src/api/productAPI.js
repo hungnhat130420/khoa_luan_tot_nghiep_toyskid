@@ -8,7 +8,7 @@ const productAPI = {
   findproductbyid(data) {
     const url = "/product/findproductbyid";
 
-    return axiosClient.post(url, { _id: data._id });
+    return axiosClient.post(url, { productID: data.productID });
   },
   findproductbycategoryid(data) {
     const url = "/product/findproductbycategoryid";
@@ -39,7 +39,8 @@ const productAPI = {
   // },
 
   updateproduct(data, accessToken) {
-    const url = "/product/updateproduct/" + data._id;
+    const url = "/product/updateproduct/" + data.productID;
+    console.log(url);
     return axiosClient.put(url, data, {
       header: { Authorization: accessToken },
     });

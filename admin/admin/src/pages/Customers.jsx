@@ -1,4 +1,5 @@
 import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import IconButton from "@mui/material/IconButton";
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from "react";
@@ -6,46 +7,221 @@ import React, { useState, useEffect } from "react";
 // import Table from "../components/table/Table";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
+import "../components/topnav/topnav1.css";
 import { Modal, Row, Col, Form, Table } from "react-bootstrap";
-import userAPI from "../api/userAPI";
 
+import SearchIcon from "@mui/icons-material/Search";
+import ReactPaginate from "react-paginate";
+import userAPI from "../api/userAPI";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import "../components/css/product.css";
+import Notifycation from "../components/alert/Notifycation";
 const Customers = () => {
   const accessToken = localStorage.getItem("accessToken_admin");
+  const [notify, setNotify] = useState({
+    isOpen: false,
+    message: "",
+    type: "",
+  });
 
   localStorage.getItem("user_admin");
   const [listUser, setListUser] = useState([]);
+  const [showDelete, setShowDelete] = useState(false);
+
+  const handleDeleteClose = () => setShowDelete(false);
+
+  // pagimation
+  const [pageNumber, setPageNumber] = useState(0);
+  const [users, setUsers] = useState([]);
+  const userPerPage = 10;
+  const pagesVisited = pageNumber * userPerPage;
+  const [displayPerPage, setDisplayPerPage] = useState([]);
+  const pageCount = Math.ceil(listUser.length / userPerPage);
+
   useEffect(() => {
     const fetchGetAll = async () => {
       try {
         const getAllUser = await userAPI.getAllUser();
-
-        console.log(getAllUser.result);
         setListUser(getAllUser.result);
-
+        setUsers(listUser.slice(0, 200));
+        setDisplayPerPage(
+          users.slice(pagesVisited, pagesVisited + userPerPage)
+        );
         //setAllProduct(getAllProduct.result);
       } catch (error) {
         console.log(error);
       }
     };
     fetchGetAll();
-  }, []);
+  }, [listUser]);
+
+  const handlePageClick = ({ selected }) => {
+    setPageNumber(selected);
+    //console.log(pageNumber);
+  };
 
   // console.log(localStorage.getItem("accessToken_admin"));
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [search, setSearch] = useState("");
+  const [valueCustomer, setValueCustomer] = useState("");
   const handleShow = () => setShow(true);
+
+  // const handUpdateRole = async () => {
+  //   try {
+  //     await userAPI.updateuserrole(
+  //       {
+  //         _id: valueCustomer._id,
+  //         role: valueCustomer.role,
+  //       },
+  //       localStorage.getItem("accessToken_admin")
+  //     );
+  //     set;
+  //     setNotify({
+  //       isOpen: true,
+  //       message: "Cập nhật thành công ",
+  //       type: "success",
+  //     });
+  //     window.location.reload(false);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
   return (
     <>
+      {valueCustomer.role == 2 ? (
+        <Modal show={showDelete}>
+          <Modal.Header>
+            Bạn có chắc chắn muốn khóa tài khoản này ?
+          </Modal.Header>
+          <Modal.Footer>
+            <Button
+              style={{
+                fontSize: "13px",
+                backgroundColor: "#EEC900",
+                marginRight: "10px",
+              }}
+              variant="contained"
+              type="submit"
+              onClick={async () => {
+                try {
+                  await userAPI.updateuserrole(
+                    {
+                      userID: valueCustomer._id,
+                      role: 3,
+                    },
+                    localStorage.getItem("accessToken_admin")
+                  );
+                  setShowDelete(false);
+                  setNotify({
+                    isOpen: true,
+                    message: "Cập nhật thành công ",
+                    type: "success",
+                  });
+                  window.location.reload(false);
+                } catch (error) {
+                  console.log(error);
+                }
+              }}
+            >
+              Khóa
+            </Button>
+
+            <Button
+              style={{
+                fontSize: "13px",
+                backgroundColor: "gray",
+              }}
+              variant="contained"
+              onClick={handleDeleteClose}
+            >
+              Hủy
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      ) : (
+        <Modal show={showDelete}>
+          <Modal.Header>Bạn có chắc chắn mở khóa tài khoản này ?</Modal.Header>
+          <Modal.Footer>
+            <Button
+              style={{
+                fontSize: "13px",
+                backgroundColor: "#EEC900",
+                marginRight: "10px",
+              }}
+              variant="contained"
+              type="submit"
+              onClick={async () => {
+                try {
+                  await userAPI.updateuserrole(
+                    {
+                      userID: valueCustomer._id,
+                      role: 2,
+                    },
+                    localStorage.getItem("accessToken_admin")
+                  );
+                  setShowDelete(false);
+                  setNotify({
+                    isOpen: true,
+                    message: "Cập nhật thành công ",
+                    type: "success",
+                  });
+                  window.location.reload(false);
+                } catch (error) {
+                  console.log(error);
+                }
+              }}
+            >
+              Khóa
+            </Button>
+
+            <Button
+              style={{
+                fontSize: "13px",
+                backgroundColor: "gray",
+              }}
+              variant="contained"
+              onClick={handleDeleteClose}
+            >
+              Hủy
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+
       <h2 className="page-header">Quản lý khách hàng</h2>
       <div style={{ padding: "20px" }}>
         <Button
           variant="outlined"
-          style={{ backgroundColor: "blue", color: "white", fontSize: "18px" }}
+          style={{
+            backgroundColor: "blue",
+            color: "white",
+            fontSize: "18px",
+            visibility: "hidden",
+          }}
           startIcon={<AddIcon />}
           onClick={handleShow}
         >
-          Thêm khách hàng
+          Thêm thương hiệu
         </Button>
+        <div
+          className="topnav1__search"
+          style={{ float: "right", width: "400px" }}
+        >
+          <input
+            type="text"
+            placeholder="Nhập mã, tên hoặc email khách hàng cần tìm..."
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          <i>
+            <IconButton aria-label="delete" size="large">
+              <SearchIcon fontSize="inherit" />
+            </IconButton>
+          </i>
+        </div>
       </div>
       <div className="row">
         <div className="col-12">
@@ -54,38 +230,85 @@ const Customers = () => {
               <Table striped bordered hover>
                 <thead>
                   <tr>
-                    <th>Mã khách hàng</th>
-                    <th>Tên đầy đủ</th>
-                    <th>Số điện thoại</th>
-                    <th>Email</th>
-                    <th>Địa chỉ</th>
-                    <th>Tên đăng nhập</th>
-                    <th>Hành động</th>
+                    <th style={{ textAlign: "center" }}>Mã khách hàng</th>
+                    <th style={{ textAlign: "center" }}>Tên đầy đủ</th>
+                    <th style={{ textAlign: "center" }}>Số điện thoại</th>
+                    <th style={{ textAlign: "center" }}>Email</th>
+                    <th style={{ textAlign: "center" }}>Địa chỉ</th>
+                    <th style={{ textAlign: "center" }}>Tên đăng nhập</th>
+                    <th style={{ textAlign: "center" }}>Hành động</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {listUser.map((item, i) => (
-                    <tr key={i}>
-                      <td>{item._id}</td>
-                      <td>{item.fullName}</td>
-                      <td>{item.phone}</td>
-                      <td>{item.email}</td>
-                      <td>{item.address}</td>
-                      <td>{item.userName}</td>
-                      <td>
-                        {" "}
-                        <IconButton aria-label="delete" size="large">
-                          <LockIcon
-                            fontSize="inherit"
-                            style={{ color: "gold" }}
-                          />
-                        </IconButton>
-                      </td>
-                    </tr>
-                  ))}
+                  {displayPerPage
+                    .filter((val) => {
+                      if (search === "") {
+                        return val;
+                      } else if (
+                        val.fullName
+                          .toLowerCase()
+                          .includes(search.toLowerCase()) ||
+                        val._id.toLowerCase().includes(search.toLowerCase()) ||
+                        val.email
+                          .toLowerCase()
+                          .includes(search.toLowerCase()) ||
+                        val.phone.toLowerCase().includes(search.toLowerCase())
+                      ) {
+                        return val;
+                      }
+                    })
+                    .map((item, i) => (
+                      <tr key={i}>
+                        <td style={{ textAlign: "center" }}>{item._id}</td>
+                        <td style={{ textAlign: "center" }}>{item.fullName}</td>
+                        <td style={{ textAlign: "center" }}>{item.phone}</td>
+                        <td style={{ textAlign: "center" }}>{item.email}</td>
+                        <td style={{ textAlign: "center" }}>{item.address}</td>
+                        <td style={{ textAlign: "center" }}>{item.userName}</td>
+                        <td style={{ textAlign: "center" }}>
+                          {" "}
+                          <IconButton aria-label="delete" size="large">
+                            {item.role == 2 ? (
+                              <LockIcon
+                                fontSize="inherit"
+                                style={{ color: "gold" }}
+                                onClick={() => {
+                                  setValueCustomer(item);
+                                  console.log(valueCustomer);
+                                  setShowDelete(true);
+                                }}
+                              />
+                            ) : (
+                              <LockOpenIcon
+                                fontSize="inherit"
+                                style={{ color: "gold" }}
+                                onClick={() => {
+                                  setValueCustomer(item);
+                                  console.log(valueCustomer);
+                                  setShowDelete(true);
+                                }}
+                              />
+                            )}
+                          </IconButton>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </Table>
             </div>
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel={<ArrowForwardIosIcon />}
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={5}
+              pageCount={pageCount}
+              previousLabel={<ArrowBackIosNewIcon />}
+              containerClassName={"paginationBttns"}
+              previousLinkClassName={"previousBttn"}
+              nextLinkClassName={"nextBttn"}
+              disabledClassName={"paginationDisabled"}
+              activeClassName={"paginationActive"}
+            />
           </div>
         </div>
       </div>

@@ -259,7 +259,7 @@ const Dashboard = () => {
             <div className="col-6">
               <div className="status-card">
                 <div className="status-card__icon">
-                  <i className="bx bx-cart"></i>
+                  <i className="bx bx-user"></i>
                 </div>
                 <div className="status-card__info">
                   <h4>{users.length}</h4>
@@ -270,7 +270,7 @@ const Dashboard = () => {
             <div className="col-6">
               <div className="status-card">
                 <div className="status-card__icon">
-                  <i className="bx bx-cart"></i>
+                  <i className="bx bx-package"></i>
                 </div>
                 <div className="status-card__info">
                   <h4>{products.length}</h4>
@@ -281,7 +281,7 @@ const Dashboard = () => {
             <div className="col-6">
               <div className="status-card">
                 <div className="status-card__icon">
-                  <i className="bx bx-cart"></i>
+                  <i className="bx bx-cart-alt"></i>
                 </div>
                 <div className="status-card__info">
                   <h4>{orders.length}</h4>
@@ -292,7 +292,7 @@ const Dashboard = () => {
             <div className="col-6">
               <div className="status-card">
                 <div className="status-card__icon">
-                  <i className="bx bx-cart"></i>
+                  <i className="bx bx-building-house"></i>
                 </div>
                 <div className="status-card__info">
                   <h4>{brands.length}</h4>

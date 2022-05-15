@@ -48,6 +48,7 @@ const Products = () => {
   const [productUpdateQuantity, setProductUpdateQuantity] = useState();
   const [productUpdateCategory, setProductUpdateCategory] = useState("");
   const [productUpdateBrand, setProductUpdateBrand] = useState("");
+  const [productUpdateBrandID, setProductUpdateBrandID] = useState("");
   const [productUpdateImage, setProductUpdateImage] = useState("");
   const [productUpdateUpdateColor, setProductUpdateColor] = useState("");
   const [productUpdateDescription, setProductUpdateDescription] = useState("");
@@ -139,26 +140,29 @@ const Products = () => {
     try {
       await productAPI.updateproduct(
         {
-          _id: valueProduct._id,
+          productID: valueProduct._id,
           productName: productUpdateName,
           price: productUpdatePrice,
           quantity: productUpdateQuantity,
           description: productUpdateDescription,
           image:
             "https://fado.vn/blog/wp-content/uploads/2021/01/Megaminx_Rubik_12_m___t.jpg",
-          brandID: productUpdateBrand,
+          brandID: productUpdateBrandID,
+          //brandID: valueBrand._id,
+
           color: [],
           categoryID: productUpdateCategory,
         },
         localStorage.getItem("accessToken_admin")
       );
+      console.log("brandID", productUpdateBrandID);
       setShowEdit(false);
       setNotify({
         isOpen: true,
         message: "Cập nhật thành công ",
         type: "success",
       });
-      window.location.reload(false);
+      //window.location.reload(false);
     } catch (error) {
       console.log(error);
     }
@@ -306,7 +310,7 @@ const Products = () => {
                                       item.description
                                     );
                                     setProductUpdateCategory(item.categoryID);
-
+                                    setProductUpdateBrandID(item.brandID);
                                     const brandName =
                                       await brandAPI.findbrandbyid(
                                         {
@@ -316,11 +320,12 @@ const Products = () => {
                                           "accessToken_admin"
                                         )
                                       );
-
+                                    console.log("BRAND", productUpdateBrandID);
                                     setValueBrand(brandName.result);
                                     setProductUpdateBrand(
                                       brandName.result.brandName
                                     );
+                                    console.log("brandName", valueBrand);
                                     const categoryName =
                                       await categoryAPI.findcategorybyid(
                                         {
@@ -348,6 +353,7 @@ const Products = () => {
                                 style={{ color: "red" }}
                                 onClick={() => {
                                   setValueProduct(item);
+                                  console.log(valueProduct);
                                   setShowDelete(true);
                                 }}
                               />
@@ -558,7 +564,7 @@ const Products = () => {
                   name="brand"
                   as="select"
                   defaultValue={productUpdateBrand}
-                  onChange={(e) => setProductUpdateBrand(e.target.value)}
+                  onChange={(e) => setProductUpdateBrandID(e.target.value)}
                 >
                   <option disabled selected hidden>
                     {valueBrand.brandName}

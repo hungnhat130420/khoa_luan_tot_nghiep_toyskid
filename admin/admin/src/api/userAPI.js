@@ -7,7 +7,21 @@ const userAPI = {
   },
   getAllUser() {
     const url = "/user/getalluser";
-    return axiosClient.get(url);
+    return axiosClient.post(url);
+  },
+  updateuserrole(data, accessToken) {
+    const url = "/user/updateuserrole";
+    return axiosClient.put(
+      url,
+      { userID: data.userID, role: data.role },
+      { header: { Authorization: accessToken } }
+    );
+  },
+  updateuser(data, accessToken) {
+    const url = "/user/updateuser";
+    return axiosClient.put(url, data, {
+      header: { Authorization: accessToken },
+    });
   },
 };
 

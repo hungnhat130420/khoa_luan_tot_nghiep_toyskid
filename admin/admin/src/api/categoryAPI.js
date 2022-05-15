@@ -11,7 +11,7 @@ const categoryAPI = {
   },
   findcategorybyid(data) {
     const url = "/category/findcategorybyid";
-    return axiosClient.post(url, { _id: data._id });
+    return axiosClient.post(url, { categoryID: data._id });
   },
   deletecategory(data, accessToken) {
     const url = "/category/deletecategory/" + data._id;

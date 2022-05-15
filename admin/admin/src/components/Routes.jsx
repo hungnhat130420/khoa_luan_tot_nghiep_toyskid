@@ -2,6 +2,7 @@ import React from "react";
 
 import { Route, Switch } from "react-router-dom";
 
+import Profile from "../components/profile1/Profile";
 import Dashboard from "../pages/Dashboard";
 import Customers from "../pages/Customers";
 import Products from "../pages/Products";
@@ -9,7 +10,6 @@ import { Orders } from "../pages/Orders";
 import { Brands } from "../pages/Brands";
 import { Categories } from "../pages/Categories";
 import { Contacts } from "../pages/Contacts";
-import { Profile } from "../components/profile/Profile";
 
 const Routes = () => {
   return (

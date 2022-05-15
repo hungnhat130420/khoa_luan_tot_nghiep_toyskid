@@ -13,44 +13,47 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import { useHistory } from "react-router-dom";
 import userAPI from "../../api/userAPI";
-export const Profile = () => {
+import authAPI from "../../api/authAPI";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+const Profile = () => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const history = useHistory();
   const user = JSON.parse(localStorage.getItem("user_admin"));
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [birthday, setBirthday] = useState("");
-  const [gender, setGender] = useState(false);
-  //const isSignIn = JSON.parse(localStorage.getItem("user_admin"));
-  useEffect(() => {
-    console.log(user);
-    setFullName(user.fullName);
-    setEmail(user.email);
-    setPhone(user.phone);
-    setGender(user.gender);
-    setBirthday(user.birthday);
-    console.log("fullname", fullName);
-    console.log("email", email);
-    console.log("phone", phone);
-    console.log("birthday", birthday);
-  }, [user]);
+
+  const [fullName, setFullName] = useState(user.fullName);
+  const [email, setEmail] = useState(user.email);
+  const [phone, setPhone] = useState(user.phone);
+  const [birthday, setBirthday] = useState(
+    !user.birthday ? null : new Date(user.birthday)
+  );
+
+  const [startDate, setStartDate] = useState(new Date(user.birthday));
+  const [gender, setGender] = useState(!user.gender ? null : user.gender);
+  console.log("user", user);
+  const changeCheckGender = () => {
+    setGender(!gender);
+  };
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     try {
-      await userAPI.updateuser(
+      const updateUser = await userAPI.updateuser(
         {
           fullName: fullName,
-          birthday: birthday,
+          birthday: startDate,
           gender: gender,
           email: email,
           phone: phone,
         },
         localStorage.getItem("user_admin")
       );
+      window.location.reload(false);
+      if (updateUser.success === true) {
+        localStorage.setItem("user_admin", JSON.stringify(updateUser.result));
+      }
     } catch (error) {
       console.log(error);
     }
@@ -58,7 +61,7 @@ export const Profile = () => {
 
   return (
     <>
-      <form onSubmit={handleUpdateUser}>
+      <form method="POST" onSubmit={handleUpdateUser}>
         <Box sx={{ width: 1 }}>
           <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={2}>
             <Box gridColumn="span 4">
@@ -109,7 +112,7 @@ export const Profile = () => {
             <Box gridColumn="span 8">
               <Grid container spacing={2}>
                 <Grid item xs={7}>
-                  {/* <TextField
+                  <TextField
                     label="Tên đầy đủ"
                     name="name"
                     fullWidth
@@ -117,60 +120,45 @@ export const Profile = () => {
                     value={fullName}
                     variant="outlined"
                     onChange={(e) => setFullName(e.target.value)}
-                  /> */}
-                  <Form.Label>Tên đầy đủ:</Form.Label>
+                  />
+                  {/* <Form.Label>Tên đầy đủ:</Form.Label>
                   <Form.Control
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={7}>
-                  <TextField
-                    id="date"
-                    fullWidth
-                    variant="outlined"
-                    label="Ngày sinh"
-                    type="date"
-                    name="ngaysinh"
-                    value={birthday.split("T")[0]}
-                    onChange={(e) => setBirthday(e.target.value)}
-                    //className={classes.textField}
-
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    inputProps={{
-                      min: "1940-01-01",
-                      max: "1995-01-01",
-                    }}
-                  />
+                  <Form.Label>Ngày sinh:</Form.Label>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    dateFormat="dd/MM/yyyy"
+                    customInput={<Form.Control type="text" />}
+                  ></DatePicker>
                 </Grid>
                 <Grid item xs={7}>
-                  <label>Giới tính :</label>
-                  <Stack spacing={3}>
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                      <br />
-                      <label>Nam: </label>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="Male"
-                        checked={gender == true}
-                        style={{ transform: "scale(1.5)" }}
-                        onChange={(e) => setGender(e.target.value)}
-                      />
-                      <label>Nữ: </label>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="Female"
-                        checked={gender == false}
-                        style={{ transform: "scale(1.5)" }}
-                        onChange={(e) => setGender(e.target.value)}
-                      />
-                    </Stack>
-                  </Stack>
+                  <Form.Label>Giới tinh:</Form.Label>
+                  <div className="d-flex flex-row">
+                    <Form.Check
+                      className="me-2"
+                      type="radio"
+                      aria-label="radio 1"
+                      name="abc"
+                      defaultChecked={user.gender == false ? false : gender}
+                      onChange={changeCheckGender}
+                    />
+                    <p className="me-5">Nam</p>
+                    <Form.Check
+                      className="me-2"
+                      type="radio"
+                      aria-label="radio 1"
+                      name="abc"
+                      defaultChecked={user.gender == true ? false : !gender}
+                      onChange={changeCheckGender}
+                    />
+                    <p>Nữ</p>
+                  </div>
                 </Grid>
                 <Grid item xs={7}>
                   <TextField
@@ -178,7 +166,6 @@ export const Profile = () => {
                     name="email"
                     variant="outlined"
                     fullWidth
-                    type="text"
                     //disabled={true}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -291,3 +278,5 @@ export const Profile = () => {
     </>
   );
 };
+
+export default Profile;

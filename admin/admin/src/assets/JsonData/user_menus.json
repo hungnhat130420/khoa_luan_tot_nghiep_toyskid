@@ -2,11 +2,11 @@
     {
         "icon": "bx bx-user",
         "route": "/profile",
-        "content": "Profile"
+        "content": "Thông tin cá nhân"
     },
    
     {
         "icon": "bx bx-log-out-circle bx-rotate-180",
-        "content": "Logout"
+        "content": "Đăng xuất"
     }
 ]
