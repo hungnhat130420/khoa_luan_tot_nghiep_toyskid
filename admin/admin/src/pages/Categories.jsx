@@ -17,8 +17,13 @@ import "../components/css/product.css";
 import ReactPaginate from "react-paginate";
 import SearchIcon from "@mui/icons-material/Search";
 import "../components/topnav/topnav1.css";
+import { useForm } from "react-hook-form";
 export const Categories = () => {
-  const history = useHistory();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const handleClose = () => setShow(false);
@@ -26,6 +31,7 @@ export const Categories = () => {
   const handleShowEdit = () => setShowEdit(true);
   const [showDelete, setShowDelete] = useState(false);
   const [valueCategory, setValueCategory] = useState("");
+  const [defaultValue, setDefaultValue] = useState("");
   const handleDeleteClose = () => setShowDelete(false);
   const handleCloseEdit = () => setShowEdit(false);
   const [notify, setNotify] = useState({
@@ -39,15 +45,15 @@ export const Categories = () => {
   const [search, setSearch] = useState("");
 
   const [listCategory, setListCategory] = useState([]);
-  const handleAddCategory = async (e) => {
-    e.preventDefault();
+  const handleAddCategory = async () => {
+    //e.preventDefault();
     await categoryAPI.addcategory(
       {
         categoryName: categoryName,
       },
       localStorage.getItem("accessToken_admin")
     );
-    //history.push("/categories");
+
     setShow(false);
     window.location.reload(false);
     setNotify({
@@ -57,8 +63,8 @@ export const Categories = () => {
     });
   };
 
-  const handleUpdateCategory = async (e) => {
-    e.preventDefault();
+  const handleUpdateCategory = async () => {
+    //e.preventDefault();
     try {
       await categoryAPI.updatecategory(
         { _id: valueCategory._id, categoryName: categoryName },
@@ -89,7 +95,6 @@ export const Categories = () => {
       try {
         const getAllCategory = await categoryAPI.getallcategory();
 
-        console.log(getAllCategory.result);
         setListCategory(getAllCategory.result);
         setCategories(listCategory.slice(0, 200));
         setDisplayPerPage(
@@ -106,6 +111,9 @@ export const Categories = () => {
   const handlePageClick = ({ selected }) => {
     setPageNumber(selected);
     //console.log(pageNumber);
+  };
+  const handleExit = () => {
+    window.location.reload(false);
   };
 
   return (
@@ -218,6 +226,7 @@ export const Categories = () => {
                             <EditIcon
                               onClick={() => {
                                 setValueCategory(item);
+                                setDefaultValue(item.categoryName);
                                 setShowEdit(true);
                               }}
                               fontSize="small"
@@ -258,57 +267,58 @@ export const Categories = () => {
       </div>
 
       {/* modal add category */}
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleClose} onExit={handleExit} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Thêm loại sản phẩm</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form method="POST">
-            <Row className="mb-3">
-              <Col>
-                <Form.Control
-                  placeholder="Name"
-                  type="text"
-                  name="name"
-                  onChange={(e) => setCategoryName(e.target.value)}
-                />
-              </Col>
-            </Row>
-
-            <Form.Group className="mb-3">
-              <Button
-                style={{
-                  fontSize: "15px",
-                  backgroundColor: "blue",
-                }}
-                variant="contained"
-                type="submit"
-                onClick={handleAddCategory}
-              >
-                Thêm loại sản phẩm
-              </Button>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-      </Modal>
-      {/* End modal add product */}
-
-      {/* modal update category */}
-      <Modal show={showEdit} onHide={handleCloseEdit} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Cập nhật loại sản phẩm</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form method="POST">
+          <form onSubmit={handleSubmit(handleAddCategory)}>
             <Row className="mb-3">
               <Col>
                 <Form.Control
                   placeholder="Tên loại"
                   type="text"
-                  name="name"
-                  defaultValue={valueCategory.categoryName}
+                  name="categoryName"
+                  {...register("categoryName", {
+                    required: true,
+                    minLength: 2,
+                    maxLength: 30,
+                  })}
                   onChange={(e) => setCategoryName(e.target.value)}
                 />
+                {errors.categoryName?.type === "required" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Vui lòng nhập tên loại
+                  </p>
+                )}
+                {errors.categoryName?.type === "minLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 2 kí tự
+                  </p>
+                )}
+                {errors.categoryName?.type === "maxLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 30 kí tự
+                  </p>
+                )}
               </Col>
             </Row>
 
@@ -320,12 +330,93 @@ export const Categories = () => {
                 }}
                 variant="contained"
                 type="submit"
-                onClick={handleUpdateCategory}
+                //onClick={handleAddCategory}
+              >
+                Thêm loại sản phẩm
+              </Button>
+            </Form.Group>
+          </form>
+        </Modal.Body>
+      </Modal>
+      {/* End modal add product */}
+
+      {/* modal update category */}
+      <Modal
+        show={showEdit}
+        onHide={handleCloseEdit}
+        onExit={handleExit}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Cập nhật loại sản phẩm</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={handleSubmit(handleUpdateCategory)}>
+            <Row className="mb-3">
+              <Col>
+                <Form.Control
+                  placeholder="Tên loại"
+                  type="text"
+                  name="categoryName"
+                  {...register("categoryName", {
+                    required: true,
+                    minLength: 2,
+
+                    maxLength: 30,
+                  })}
+                  defaultValue={valueCategory.categoryName}
+                  onChange={(e) => setCategoryName(e.target.value)}
+                />
+                {errors.categoryName?.type === "required" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Vui lòng nhập tên loại
+                  </p>
+                )}
+                {errors.categoryName?.type === "minLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 2 kí tự
+                  </p>
+                )}
+                {errors.categoryName?.type === "maxLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 20 kí tự
+                  </p>
+                )}
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Button
+                style={{
+                  fontSize: "15px",
+                  backgroundColor: "blue",
+                }}
+                variant="contained"
+                type="submit"
+                //onClick={handleUpdateCategory}
               >
                 Cập nhật loại sản phẩm
               </Button>
             </Form.Group>
-          </Form>
+          </form>
         </Modal.Body>
       </Modal>
       <Notifycation notify={notify} setNotify={setNotify} />

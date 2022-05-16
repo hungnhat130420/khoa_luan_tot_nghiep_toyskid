@@ -20,8 +20,15 @@ import ReactPaginate from "react-paginate";
 import SearchIcon from "@mui/icons-material/Search";
 import "../components/topnav/topnav1.css";
 import uploadAPI from "../api/uploadAPI";
+import { useForm } from "react-hook-form";
+import jsonCountry from "../assets/JsonData/CountryData.json";
 export const Brands = () => {
   const history = useHistory();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const handleClose = () => setShow(false);
@@ -29,6 +36,7 @@ export const Brands = () => {
   const handleShowEdit = () => setShowEdit(true);
   const handleCloseEdit = () => setShowEdit(false);
   const [listBrand, setListBrand] = useState([]);
+  const [country, setCountry] = useState([]);
   const [showDelete, setShowDelete] = useState(false);
   const [valueBrand, setValueBrand] = useState("");
   const handleDeleteClose = () => setShowDelete(false);
@@ -41,8 +49,9 @@ export const Brands = () => {
   });
 
   const [brandName, setBrandName] = useState("");
+  const [brandUpdateName, setBrandUpdateName] = useState("");
 
-  const [nation, setNation] = useState("");
+  const [nation, setNation] = useState("Afghanistan");
 
   const [brandImage, setBrandImage] = useState("");
   const options = useMemo(() => countryList().getData(), []);
@@ -51,8 +60,8 @@ export const Brands = () => {
     setNation(value);
   };
 
-  const handleAddBrand = async (e) => {
-    e.preventDefault();
+  const handleAddBrand = async () => {
+    //e.preventDefault();
     const fd = new FormData();
     fd.append("image", brandImage);
     const result = await uploadAPI.uploadimage(fd);
@@ -61,7 +70,7 @@ export const Brands = () => {
     await brandAPI.addbrand(
       {
         brandName: brandName,
-        nation: nation.label,
+        nation: nation,
         image: result,
       },
       localStorage.getItem("accessToken_admin")
@@ -76,8 +85,8 @@ export const Brands = () => {
     });
   };
 
-  const handleUpdateBrand = async (e) => {
-    e.preventDefault();
+  const handleUpdateBrand = async () => {
+    //e.preventDefault();
     const fd = new FormData();
     fd.append("image", brandImage);
     const result = await uploadAPI.uploadimage(fd);
@@ -85,8 +94,8 @@ export const Brands = () => {
       await brandAPI.updatebrand(
         {
           _id: valueBrand._id,
-          brandName: brandName,
-          nation: nation.label,
+          brandName: brandUpdateName,
+          nation: nation,
           image: result,
         },
         localStorage.getItem("accessToken_admin")
@@ -120,7 +129,6 @@ export const Brands = () => {
         setDisplayPerPage(
           brands.slice(pagesVisited, pagesVisited + brandPerPage)
         );
-        console.log("listBrand", displayPerPage);
       } catch (error) {
         console.log(error);
       }
@@ -130,6 +138,15 @@ export const Brands = () => {
   const handlePageClick = ({ selected }) => {
     setPageNumber(selected);
     //console.log(pageNumber);
+  };
+
+  useEffect(() => {
+    const data = jsonCountry;
+    setCountry(data);
+  }, []);
+
+  const handleExit = () => {
+    window.location.reload(false);
   };
 
   return (
@@ -255,6 +272,7 @@ export const Brands = () => {
                             <EditIcon
                               onClick={() => {
                                 setValueBrand(item);
+                                setBrandUpdateName(item.brandName);
                                 setShowEdit(true);
                                 console.log("item", item);
                               }}
@@ -296,37 +314,97 @@ export const Brands = () => {
       </div>
 
       {/* modal add brand */}
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleClose} size="lg" onExit={handleExit}>
         <Modal.Header closeButton>
           <Modal.Title> Thêm thương hiệu </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form method="POST">
+          <form onSubmit={handleSubmit(handleAddBrand)}>
             <Row className="mb-3">
               <Col>
                 <Form.Control
                   placeholder="Tên thương hiệu"
                   type="text"
-                  name="name"
+                  name="brandName"
+                  {...register("brandName", {
+                    required: true,
+                    minLength: 6,
+                    maxLength: 30,
+                  })}
                   onChange={(e) => setBrandName(e.target.value)}
                 />
+                {errors.brandName?.type === "required" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Vui lòng nhập tên loại
+                  </p>
+                )}
+                {errors.brandName?.type === "minLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 6 kí tự
+                  </p>
+                )}
+                {errors.brandName?.type === "maxLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 30 kí tự
+                  </p>
+                )}
               </Col>
               <Col>
-                <Select
+                {/* <Select
                   options={options}
                   value={nation}
                   onChange={changeHandler}
                   placeholder="Quốc gia"
-                />
+                  required
+                  {...register("country", {
+                    required: "chon quoc gia",
+                  })}
+                /> */}
+
+                <select
+                  name="country"
+                  style={{ height: "40px", borderRadius: "4px" }}
+                  onChange={(e) => setNation(e.target.value)}
+                >
+                  {/* <option disabled selected hidden>
+                    Chọn quốc gia
+                  </option> */}
+                  <option value="Afghanistan">Afghanistan</option>
+                  {country.map((item) => (
+                    <option key={item.country} value={item.country}>
+                      {item.country}
+                    </option>
+                  ))}
+                </select>
               </Col>
             </Row>
             <Row className="mb-3 ml-3">
               <Col>
                 <Col>
                   <Form.Control
+                    required
                     type="file"
                     accept="image/*"
                     placeholder="pick image"
+                    name="brandImage"
                     onChange={(e) => setBrandImage(e.target.files[0])}
                   />
                 </Col>
@@ -341,12 +419,12 @@ export const Brands = () => {
                 }}
                 variant="contained"
                 type="submit"
-                onClick={handleAddBrand}
+                //onClick={handleAddBrand}
               >
                 Thêm thương hiệu
               </Button>
             </Form.Group>
-          </Form>
+          </form>
         </Modal.Body>
       </Modal>
 
@@ -356,61 +434,113 @@ export const Brands = () => {
           <Modal.Title> Cập nhật thương hiệu </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form method="POST">
+          <form onSubmit={handleSubmit(handleUpdateBrand)}>
             <Row className="mb-3">
               <Col>
                 <Form.Control
                   placeholder="Tên thương hiệu"
                   type="text"
+                  name="brandName"
+                  {...register("brandName", {
+                    required: true,
+                    minLength: 6,
+                    maxLength: 30,
+                  })}
+                  onChange={(e) => setBrandUpdateName(e.target.value)}
                   defaultValue={valueBrand.brandName}
-                  name="name"
-                  onChange={(e) => setBrandName(e.target.value)}
                 />
+                {errors.brandName?.type === "required" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Vui lòng nhập tên loại
+                  </p>
+                )}
+                {errors.brandName?.type === "minLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 6 kí tự
+                  </p>
+                )}
+                {errors.brandName?.type === "maxLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 30 kí tự
+                  </p>
+                )}
               </Col>
               <Col>
-                <Select
+                {/* <Select
                   options={options}
                   value={nation}
-                  defaultValue={valueBrand.nation}
                   onChange={changeHandler}
                   placeholder="Quốc gia"
-                />
+                  required
+                  {...register("country", {
+                    required: "chon quoc gia",
+                  })}
+                /> */}
+
+                <select
+                  name="country"
+                  style={{ height: "40px", borderRadius: "4px" }}
+                  onChange={(e) => setNation(e.target.value)}
+                >
+                  <option disabled selected hidden>
+                    {valueBrand.nation}
+                  </option>
+                  {/* <option value="Afghanistan">Afghanistan</option>*/}
+                  {country.map((item) => (
+                    <option key={item.country} value={item.country}>
+                      {item.country}
+                    </option>
+                  ))}
+                </select>
               </Col>
             </Row>
             <Row className="mb-3 ml-3">
               <Col>
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  placeholder="pick image"
-                  onChange={(e) => setBrandImage(e.target.files[0])}
-                />
-
-                <Button
-                  style={{
-                    fontSize: "15px",
-                    backgroundColor: "blue",
-                    marginTop: "30px",
-                  }}
-                  variant="contained"
-                  type="submit"
-                  onClick={handleUpdateBrand}
-                >
-                  Cập nhật thương hiệu
-                </Button>
-              </Col>
-
-              <Col>
-                <img
-                  src={valueBrand.image}
-                  alt=""
-                  style={{ width: "370px", height: "200px" }}
-                />
+                <Col>
+                  <Form.Control
+                    required
+                    type="file"
+                    accept="image/*"
+                    placeholder="pick image"
+                    name="brandImage"
+                    onChange={(e) => setBrandImage(e.target.files[0])}
+                  />
+                </Col>
               </Col>
             </Row>
 
-            <Form.Group className="mb-3"></Form.Group>
-          </Form>
+            <Form.Group className="mb-3">
+              <Button
+                style={{
+                  fontSize: "15px",
+                  backgroundColor: "blue",
+                }}
+                variant="contained"
+                type="submit"
+                //onClick={handleAddBrand}
+              >
+                cập nhật thương hiệu
+              </Button>
+            </Form.Group>
+          </form>
         </Modal.Body>
       </Modal>
       <Notifycation notify={notify} setNotify={setNotify} />

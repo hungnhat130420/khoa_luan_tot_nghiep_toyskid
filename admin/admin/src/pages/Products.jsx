@@ -42,6 +42,10 @@ const Products = () => {
   const [productImage, setProductImage] = useState("");
   const [productColor, setProductColor] = useState("");
   const [productDescription, setProductDescription] = useState("");
+  // const [productCategoryFirst, setProductCategoryFirst] = useState(
+  //   categories[0]._id
+  // );
+  // const [productBrandFirst, setProductBrandFirst] = useState(listBrand[0]._id);
 
   const [productUpdateName, setProductUpdateName] = useState("");
   const [productUpdatePrice, setProductUpdatePrice] = useState();
@@ -49,6 +53,7 @@ const Products = () => {
   const [productUpdateCategory, setProductUpdateCategory] = useState("");
   const [productUpdateBrand, setProductUpdateBrand] = useState("");
   const [productUpdateBrandID, setProductUpdateBrandID] = useState("");
+  const [productUpdateCategoryID, setProductUpdateCategoryID] = useState("");
   const [productUpdateImage, setProductUpdateImage] = useState("");
   const [productUpdateUpdateColor, setProductUpdateColor] = useState("");
   const [productUpdateDescription, setProductUpdateDescription] = useState("");
@@ -70,6 +75,31 @@ const Products = () => {
       console.log(error);
     }
   };
+  useEffect(() => {
+    const fetchGetAllCate = async () => {
+      try {
+        const getAllCategory = await categoryAPI.getallcategory();
+        setCategories(getAllCategory.result);
+        console.log("cate", getAllCategory.result);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchGetAllCate();
+  }, []);
+
+  useEffect(() => {
+    const fetchGetAllBrand = async () => {
+      try {
+        const getAllBrand = await brandAPI.getallbrand();
+        setListBrand(getAllBrand.result);
+        console.log("brand", getAllBrand.result);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchGetAllBrand();
+  }, []);
 
   const handleDelete = () => {
     console.log("click");
@@ -153,7 +183,7 @@ const Products = () => {
           //brandID: valueBrand._id,
 
           color: [],
-          categoryID: productUpdateCategory,
+          categoryID: productUpdateCategoryID,
         },
         localStorage.getItem("accessToken_admin")
       );
@@ -314,6 +344,7 @@ const Products = () => {
                                     setProductUpdateImage(item.image);
                                     setProductUpdateCategory(item.categoryID);
                                     setProductUpdateBrandID(item.brandID);
+                                    setProductUpdateCategoryID(item.categoryID);
                                     const brandName =
                                       await brandAPI.findbrandbyid(
                                         {
@@ -323,11 +354,18 @@ const Products = () => {
                                           "accessToken_admin"
                                         )
                                       );
-                                    console.log("BRAND", productUpdateImage);
                                     setValueBrand(brandName.result);
-                                    setProductUpdateBrand(
-                                      brandName.result.brandName
-                                    );
+                                    console.log("brandname", brandName);
+                                    if (brandName.result !== null) {
+                                      setProductUpdateBrand(
+                                        brandName.result.brandName
+                                      );
+                                    }
+
+                                    if (brandName.result === null) {
+                                      setProductUpdateBrand(brandName.result);
+                                    }
+
                                     console.log("brandName", valueBrand);
                                     const categoryName =
                                       await categoryAPI.findcategorybyid(
@@ -340,6 +378,17 @@ const Products = () => {
                                       );
 
                                     setValueCategory(categoryName.result);
+                                    if (categoryName.result !== null) {
+                                      setProductUpdateCategory(
+                                        categoryName.result.categoryName
+                                      );
+                                    }
+
+                                    if (categoryName.result === null) {
+                                      setProductUpdateCategory(
+                                        categoryName.result
+                                      );
+                                    }
                                     handleShow();
                                     setShowEdit(true);
                                   } catch (err) {
@@ -408,9 +457,8 @@ const Products = () => {
                   required
                   onChange={(e) => setProductCategory(e.target.value)}
                 >
-                  <option disabled selected hidden>
-                    Chọn loại sản phẩm
-                  </option>
+                  <option disabled selected hidden></option>
+
                   {categories.map((item, i) => (
                     <option key={i} value={item._id}>
                       {item.categoryName}
@@ -452,11 +500,13 @@ const Products = () => {
                 <Form.Select
                   aria-label="brand"
                   name="brand"
+                  required="true"
                   onChange={(e) => setProductBrand(e.target.value)}
                 >
-                  <option disabled selected hidden>
+                  {/* <option disabled selected hidden>
                     Chọn thuơng hiệu
-                  </option>
+                  </option> */}
+
                   {listBrand.map((item, i) => (
                     <option key={i} value={item._id}>
                       {item.brandName}
@@ -519,10 +569,10 @@ const Products = () => {
                   name="category"
                   required
                   defaultValue={productUpdateCategory}
-                  onChange={(e) => setProductUpdateCategory(e.target.value)}
+                  onChange={(e) => setProductUpdateCategoryID(e.target.value)}
                 >
                   <option disabled selected hidden>
-                    {valueCategory.categoryName}
+                    {valueCategory === null ? null : valueCategory.categoryName}
                   </option>
                   {categories.map((item, i) => (
                     <option key={i} value={item._id}>
@@ -572,7 +622,7 @@ const Products = () => {
                   onChange={(e) => setProductUpdateBrandID(e.target.value)}
                 >
                   <option disabled selected hidden>
-                    {valueBrand.brandName}
+                    {valueBrand === null ? null : valueBrand.brandName}
                   </option>
                   {listBrand.map((item, i) => (
                     <option key={i} value={item._id}>
