@@ -19,9 +19,11 @@ import "../components/css/product.css";
 import ReactPaginate from "react-paginate";
 import SearchIcon from "@mui/icons-material/Search";
 import "../components/topnav/topnav1.css";
-import uploadAPI from "../api/uploadAPI";
+//import uploadAPI from "../api/uploadAPI";
 import { useForm } from "react-hook-form";
 import jsonCountry from "../assets/JsonData/CountryData.json";
+import { storage } from "../firebase/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 export const Brands = () => {
   const history = useHistory();
   const {
@@ -48,9 +50,11 @@ export const Brands = () => {
     type: "",
   });
 
-  const [brandName, setBrandName] = useState("");
   const [brandUpdateName, setBrandUpdateName] = useState("");
+  const [brandUpdateNation, setBrandUpdateNation] = useState("");
+  const [brandUpdateImage, setBrandUpdateImage] = useState("");
 
+  const [brandName, setBrandName] = useState("");
   const [nation, setNation] = useState("Afghanistan");
 
   const [brandImage, setBrandImage] = useState("");
@@ -62,21 +66,39 @@ export const Brands = () => {
 
   const handleAddBrand = async () => {
     //e.preventDefault();
-    const fd = new FormData();
-    fd.append("image", brandImage);
-    const result = await uploadAPI.uploadimage(fd);
-    const arr = [];
-    arr.push(result);
-    await brandAPI.addbrand(
+    const addBrand = await brandAPI.addbrand(
       {
         brandName: brandName,
         nation: nation,
-        image: result,
+        image: "https://cf.shopee.vn/file/4e794ed10d435596f624978cc2eef103",
       },
       localStorage.getItem("accessToken_admin")
     );
-    window.location.reload(false);
-    //history.push("/brands");
+    console.log("add product", addBrand);
+    const imageRef = ref(storage, addBrand.result._id);
+    uploadBytes(imageRef, brandImage)
+      .then(() => {
+        getDownloadURL(imageRef)
+          .then(async (url) => {
+            console.log("url", url);
+            // console.log("productimage", productImage);
+            const updateBrand = await brandAPI.updatebrand(
+              {
+                brandID: addBrand.result._id,
+                image: url,
+              },
+              localStorage.getItem("accessToken_admin")
+            );
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    //window.location.reload(false);
+
     setShow(false);
     setNotify({
       isOpen: true,
@@ -86,27 +108,40 @@ export const Brands = () => {
   };
 
   const handleUpdateBrand = async () => {
-    //e.preventDefault();
-    const fd = new FormData();
-    fd.append("image", brandImage);
-    const result = await uploadAPI.uploadimage(fd);
     try {
-      await brandAPI.updatebrand(
-        {
-          _id: valueBrand._id,
-          brandName: brandUpdateName,
-          nation: nation,
-          image: result,
-        },
-        localStorage.getItem("accessToken_admin")
-      );
-      setShowEdit(false);
-      setNotify({
-        isOpen: true,
-        message: "Cập nhật thành công thành công",
-        type: "success",
-      });
-      window.location.reload(false);
+      const imageRef = ref(storage, valueBrand._id);
+      uploadBytes(imageRef, brandUpdateImage)
+        .then(() => {
+          getDownloadURL(imageRef)
+            .then(async (url) => {
+              console.log("url", url);
+              //console.log("brand", productImage);
+              const updateBrand = await brandAPI.updatebrand(
+                {
+                  brandID: valueBrand._id,
+                  brandName: brandUpdateName,
+                  nation: brandUpdateNation,
+                  image: url,
+                },
+                localStorage.getItem("accessToken_admin")
+              );
+              console.log("update brand", updateBrand);
+              setShowEdit(false);
+              setNotify({
+                isOpen: true,
+                message: "Cập nhật thành công thành công",
+                type: "success",
+              });
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      //window.location.reload(false);
     } catch (error) {
       console.log(error);
     }
@@ -273,6 +308,8 @@ export const Brands = () => {
                               onClick={() => {
                                 setValueBrand(item);
                                 setBrandUpdateName(item.brandName);
+                                setBrandUpdateNation(item.nation);
+                                setBrandUpdateImage(item.image);
                                 setShowEdit(true);
                                 console.log("item", item);
                               }}
@@ -314,12 +351,12 @@ export const Brands = () => {
       </div>
 
       {/* modal add brand */}
-      <Modal show={show} onHide={handleClose} size="lg" onExit={handleExit}>
+      <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
           <Modal.Title> Thêm thương hiệu </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={handleSubmit(handleAddBrand)}>
+          <Form onSubmit={handleSubmit(handleAddBrand)}>
             <Row className="mb-3">
               <Col>
                 <Form.Control
@@ -424,7 +461,7 @@ export const Brands = () => {
                 Thêm thương hiệu
               </Button>
             </Form.Group>
-          </form>
+          </Form>
         </Modal.Body>
       </Modal>
 
@@ -498,7 +535,7 @@ export const Brands = () => {
                 <select
                   name="country"
                   style={{ height: "40px", borderRadius: "4px" }}
-                  onChange={(e) => setNation(e.target.value)}
+                  onChange={(e) => setBrandUpdateNation(e.target.value)}
                 >
                   <option disabled selected hidden>
                     {valueBrand.nation}
@@ -521,7 +558,7 @@ export const Brands = () => {
                     accept="image/*"
                     placeholder="pick image"
                     name="brandImage"
-                    onChange={(e) => setBrandImage(e.target.files[0])}
+                    onChange={(e) => setBrandUpdateImage(e.target.files[0])}
                   />
                 </Col>
               </Col>

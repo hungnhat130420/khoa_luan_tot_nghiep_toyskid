@@ -17,9 +17,16 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import SearchIcon from "@mui/icons-material/Search";
 import "../components/topnav/topnav1.css";
-import uploadAPI from "../api/uploadAPI";
+import { useForm } from "react-hook-form";
+import { storage } from "../firebase/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 const Products = () => {
   const accessToken = localStorage.getItem("accessToken_admin");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   localStorage.getItem("user_admin");
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -135,27 +142,45 @@ const Products = () => {
     //console.log(pageNumber);
   };
 
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    const fd = new FormData();
-    fd.append("image", productImage);
-    const result = await uploadAPI.uploadimage(fd);
-    const arr = [];
-    arr.push(result);
-    await productAPI.addproduct(
+  const handleAddProduct = async () => {
+    const addProduct = await productAPI.addproduct(
       {
         productName: productName,
         price: productPrice,
         quantity: productQuantity,
         description: productDescription,
-        image: result,
+        image: "https://cf.shopee.vn/file/4e794ed10d435596f624978cc2eef103",
         brandID: productBrand,
         color: [],
         categoryID: productCategory,
       },
       localStorage.getItem("accessToken_admin")
     );
-    window.location.reload(false);
+    console.log("add product", addProduct);
+    const imageRef = ref(storage, addProduct.result._id);
+    uploadBytes(imageRef, productImage)
+      .then(() => {
+        getDownloadURL(imageRef)
+          .then(async (url) => {
+            console.log("url", url);
+            console.log("productimage", productImage);
+            const updateProduct = await productAPI.updateproduct(
+              {
+                productID: addProduct.result._id,
+                image: url,
+              },
+              localStorage.getItem("accessToken_admin")
+            );
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    //window.location.reload(false);
+
     //console.log("brand", productBrand);
     setShow(false);
     setNotify({
@@ -164,36 +189,73 @@ const Products = () => {
       type: "success",
     });
   };
-  const handleUpdateProduct = async (e) => {
-    e.preventDefault();
-    const fd = new FormData();
-    fd.append("image", productUpdateImage);
-    const result = await uploadAPI.uploadimage(fd);
-
+  const handleUpdateProduct = async () => {
+    //e.preventDefault();
     try {
-      await productAPI.updateproduct(
-        {
-          productID: valueProduct._id,
-          productName: productUpdateName,
-          price: productUpdatePrice,
-          quantity: productUpdateQuantity,
-          description: productUpdateDescription,
-          image: result,
-          brandID: productUpdateBrandID,
-          //brandID: valueBrand._id,
+      if (valueProduct.image !== "") {
+        const imageRef = ref(storage, valueProduct._id);
 
-          color: [],
-          categoryID: productUpdateCategoryID,
-        },
-        localStorage.getItem("accessToken_admin")
-      );
-      console.log("brandID", productUpdateBrandID);
-      setShowEdit(false);
-      setNotify({
-        isOpen: true,
-        message: "Cập nhật thành công ",
-        type: "success",
-      });
+        uploadBytes(imageRef, productUpdateImage)
+          .then(() => {
+            getDownloadURL(imageRef)
+              .then(async (url) => {
+                console.log("url", url);
+
+                await productAPI.updateproduct(
+                  {
+                    productID: valueProduct._id,
+                    productName: productUpdateName,
+                    price: productUpdatePrice,
+                    quantity: productUpdateQuantity,
+                    description: productUpdateDescription,
+                    image: url,
+                    brandID: productUpdateBrandID,
+                    //brandID: valueBrand._id,
+
+                    color: [],
+                    categoryID: productUpdateCategoryID,
+                  },
+                  localStorage.getItem("accessToken_admin")
+                );
+                console.log("brandID", productUpdateBrandID);
+                setShowEdit(false);
+                setNotify({
+                  isOpen: true,
+                  message: "Cập nhật thành công ",
+                  type: "success",
+                });
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else if (valueProduct.image === "") {
+        await productAPI.updateproduct(
+          {
+            productID: valueProduct._id,
+            productName: productUpdateName,
+            price: productUpdatePrice,
+            quantity: productUpdateQuantity,
+            description: productUpdateDescription,
+
+            brandID: productUpdateBrandID,
+            //brandID: valueBrand._id,
+
+            color: [],
+            categoryID: productUpdateCategoryID,
+          },
+          localStorage.getItem("accessToken_admin")
+        );
+        setShowEdit(false);
+        setNotify({
+          isOpen: true,
+          message: "Cập nhật thành công ",
+          type: "success",
+        });
+      }
       //window.location.reload(false);
     } catch (error) {
       console.log(error);
@@ -440,15 +502,53 @@ const Products = () => {
           <Modal.Title>Thêm sản phẩm</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form method="POST">
+          <Form onSubmit={handleSubmit(handleAddProduct)}>
             <Row className="mb-3">
               <Col>
                 <Form.Control
                   placeholder="Tên sản phẩm"
                   type="text"
-                  name="name"
+                  name="productName"
+                  {...register("productName", {
+                    required: true,
+                    minLength: 6,
+                    maxLength: 30,
+                  })}
                   onChange={(e) => setProductName(e.target.value)}
                 />
+                {errors.productName?.type === "required" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Vui lòng nhập tên loại
+                  </p>
+                )}
+                {errors.productName?.type === "minLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 6 kí tự
+                  </p>
+                )}
+                {errors.productName?.type === "maxLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 30 kí tự
+                  </p>
+                )}
               </Col>
               <Col>
                 <Form.Select
@@ -472,6 +572,7 @@ const Products = () => {
                 <Form.Control
                   placeholder="Giá sản phẩm"
                   type="number"
+                  required
                   name="price"
                   onChange={(e) => setProductPrice(e.target.value)}
                 />
@@ -482,6 +583,7 @@ const Products = () => {
                   placeholder="Số lượng sản phẩm"
                   type="number"
                   name="quantity"
+                  required
                   onChange={(e) => setProductQuantity(e.target.value)}
                 />
               </Col>
@@ -490,6 +592,7 @@ const Products = () => {
             <Row className="mb-3 ml-3">
               <Col>
                 <Form.Control
+                  required
                   type="file"
                   accept="image/*"
                   placeholder="pick image"
@@ -500,12 +603,10 @@ const Products = () => {
                 <Form.Select
                   aria-label="brand"
                   name="brand"
-                  required="true"
+                  required
                   onChange={(e) => setProductBrand(e.target.value)}
                 >
-                  {/* <option disabled selected hidden>
-                    Chọn thuơng hiệu
-                  </option> */}
+                  <option disabled selected hidden></option>
 
                   {listBrand.map((item, i) => (
                     <option key={i} value={item._id}>
@@ -522,6 +623,7 @@ const Products = () => {
                   as="textarea"
                   placeholder="Mô tả sản phẩm"
                   style={{ height: "150px" }}
+                  required
                   onChange={(e) => setProductDescription(e.target.value)}
                 />
               </Col>
@@ -535,7 +637,7 @@ const Products = () => {
                 }}
                 variant="contained"
                 type="submit"
-                onClick={handleAddProduct}
+                //onClick={handleAddProduct}
               >
                 Thêm sản phẩm
               </Button>
@@ -551,23 +653,60 @@ const Products = () => {
           <Modal.Title>Cập nhật sản phẩm</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <form onSubmit={handleSubmit(handleUpdateProduct)}>
             <Row className="mb-3">
               <Col>
                 <Form.Control
                   placeholder="Tên sản phẩm"
                   type="text"
-                  name="name"
+                  name="productName"
+                  {...register("productName", {
+                    required: true,
+                    minLength: 6,
+                    maxLength: 30,
+                  })}
                   defaultValue={productUpdateName}
                   onChange={(e) => setProductUpdateName(e.target.value)}
                 />
+                {errors.productName?.type === "required" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Vui lòng nhập tên loại
+                  </p>
+                )}
+                {errors.productName?.type === "minLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 6 kí tự
+                  </p>
+                )}
+                {errors.productName?.type === "maxLength" && (
+                  <p
+                    style={{
+                      color: "red",
+                      marginTop: "5px",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    Có tối đa 30 kí tự
+                  </p>
+                )}
               </Col>
 
               <Col>
                 <Form.Select
                   aria-label="category"
                   name="category"
-                  required
                   defaultValue={productUpdateCategory}
                   onChange={(e) => setProductUpdateCategoryID(e.target.value)}
                 >
@@ -587,6 +726,7 @@ const Products = () => {
                 <Form.Control
                   placeholder="Giá sản phẩm"
                   type="number"
+                  required
                   name="price"
                   defaultValue={productUpdatePrice}
                   onChange={(e) => setProductUpdatePrice(e.target.value)}
@@ -596,6 +736,7 @@ const Products = () => {
                 <Form.Control
                   placeholder="Số luợng"
                   type="number"
+                  required
                   name="quantity"
                   defaultValue={productUpdateQuantity}
                   onChange={(e) => setProductUpdateQuantity(e.target.value)}
@@ -606,9 +747,11 @@ const Products = () => {
             <Row className="mb-3 ml-3">
               <Col>
                 <Form.Control
+                  required
                   type="file"
                   accept="image/*"
                   placeholder="pick image"
+                  // required
                   //value={productUpdateImage}
                   onChange={(e) => setProductUpdateImage(e.target.files[0])}
                 />
@@ -638,6 +781,7 @@ const Products = () => {
                 <Form.Control
                   as="textarea"
                   placeholder="Mô tả sản phẩm"
+                  required
                   style={{ height: "150px" }}
                   defaultValue={productUpdateDescription}
                   onChange={(e) => setProductUpdateDescription(e.target.value)}
@@ -653,12 +797,12 @@ const Products = () => {
                 }}
                 variant="contained"
                 type="submit"
-                onClick={handleUpdateProduct}
+                //onClick={handleUpdateProduct}
               >
                 Cập nhật
               </Button>
             </Form.Group>
-          </Form>
+          </form>
         </Modal.Body>
       </Modal>
       <Notifycation notify={notify} setNotify={setNotify} />

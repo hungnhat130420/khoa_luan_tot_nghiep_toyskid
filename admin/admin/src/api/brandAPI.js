@@ -25,13 +25,11 @@ const brandAPI = {
     return axiosClient.delete(url, { header: { Authorization: accessToken } });
   },
   updatebrand(data, accessToken) {
-    const url = "/brand/updatebrand/" + data._id;
+    const url = "/brand/updatebrand/" + data.brandID;
 
-    return axiosClient.put(
-      url,
-      { brandName: data.brandName, nation: data.nation, image: data.image },
-      { header: { Authorization: accessToken } }
-    );
+    return axiosClient.put(url, data, {
+      header: { Authorization: accessToken },
+    });
   },
   addbrand(data, accessToken) {
     const url = "/brand/addbrand";
